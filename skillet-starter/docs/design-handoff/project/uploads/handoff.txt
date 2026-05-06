@@ -1,0 +1,212 @@
+Design Handoff
+Meal Recipe PWA
+Prepared for: Claude Design
+Purpose: UI/UX design before frontend implementation
+How to use this document
+This handoff is the complete brief for designing a Meal Recipe Progressive Web App. It captures every strategic decision made during a planning conversation: objectives, scope, constraints, target users, content shape, and tone. Read it end-to-end before starting design work.
+What this document does: tell you WHAT to design and WHY. What it does NOT do: prescribe colors, typefaces, or specific layouts. Those are your call.
+A list of open questions appears at the end. Please address them in your proposal — either by making a recommendation with rationale, or by flagging them back for input.
+1. Project Overview
+What it is
+A Progressive Web App for discovering, saving, and cooking healthy recipes. The app uses the Spoonacular API (free tier) for recipe data and stores all user data locally on the device.
+Who it is for
+Adults who want to eat healthier and cook more at home, but who feel friction between that intention and the reality of &quot;what should I cook tonight?&quot; The user is not a professional chef. They have a phone in the kitchen, ingredients in the fridge, and limited time. They want help finding recipes that match their dietary needs and making those recipes actually cookable in real life.
+What success looks like
+The app must achieve three objectives, in priority order:
+Demonstrate modern PWA engineering competence. This is a portfolio piece. The design must support a polished, performant, installable, offline-capable experience.
+Drive genuine behavior change toward healthier eating. The app must reduce friction between intention and action. Real users (including the developer) will use it to plan and cook real meals.
+Tell a compelling product story. The design should have a clear identity and personality that comes through immediately on first impression.
+2. Architecture &amp; Technical Constraints
+These are fixed and must shape the design:
+Progressive Web App (PWA). Installable, offline-capable, runs in a browser. Designs must work without native-app affordances (no native nav bars, no platform-specific gestures assumed).
+Local-first. No backend, no user accounts, no server-side sync. All user data (favorites, preferences, history) lives in the browser via IndexedDB. Designs must not assume cross-device continuity.
+Mobile-first, desktop-ready. The phone is the primary use case (it is a kitchen app, used while cooking). Desktop must also feel polished and intentional because portfolio reviewers will visit on laptops. Both form factors are equally important; the only priority order is &quot;design the mobile experience first, then expand to desktop.&quot;
+Offline must feel intentional, not broken. When the user opens a saved recipe with no connection, it should &quot;just work.&quot; When a feature requires the network and the network is gone, the design must communicate that clearly without making the app feel broken.
+API budget is tight. Spoonacular free tier allows 150 points per day. The design should encourage caching and reuse over fresh fetches. For example: prominently surface saved/favorited content so users return to it instead of re-searching.
+Tech stack: React. Designs do not need to assume a specific component library, but should be implementable with standard React patterns and CSS (no exotic motion frameworks required).
+3. MVP Scope — Five Features
+The following five features comprise the v1 scope. Please design ALL of them. Nothing else should appear in the design (see &quot;Out of Scope&quot; below).
+Feature 1 — Recipe Search with Smart Filters
+The home screen and primary entry point. Users search for recipes with filters that support healthy-eating goals.
+Filters required:
+Diet (single-select: vegetarian, vegan, keto, paleo, gluten-free, pescatarian, etc.)
+Intolerances (multi-select: dairy, gluten, peanut, soy, tree nut, egg, shellfish, etc.)
+Max ready time (15 / 30 / 60 minutes, or &quot;any&quot;)
+Meal type (breakfast / lunch / dinner / snack / dessert)
+Calories per serving (range slider)
+Behavior notes:
+Search input has type-ahead autocomplete
+Results display as cards with: image, title, ready time, a quick health/nutrition cue
+Empty state for &quot;no results&quot; should suggest filter adjustments
+Loading states should not feel like the app is broken
+Pagination or infinite scroll — designer's call, but support 12+ results
+Feature 2 — Recipe Detail View with Cook Mode
+The most important screen in the app. This is where the user transitions from &quot;browsing&quot; to &quot;actually cooking.&quot;
+Two modes for the same recipe:
+Browse Mode (default):
+Hero image, title, ready time, servings, source attribution
+Nutrition summary (calories, macros) — visible without scrolling
+Ingredient list with serving-size adjuster (slider or +/- to recalculate amounts)
+US/metric unit toggle
+Full instructions, scrollable
+Favorite button (heart) — must be unmistakable and always reachable
+&quot;Start Cooking&quot; CTA that transitions to Cook Mode
+Cook Mode:
+One step at a time, very large readable text
+Big &quot;Next Step&quot; button reachable with thumb on phone
+Step number / total steps visible
+Screen wake-lock will be enabled (no design implication, just FYI)
+Easy exit back to Browse Mode
+Designed for use with messy hands — buttons must be huge and forgiving
+Feature 3 — Favorites
+A dedicated section where users browse recipes they have saved. All saved recipes are cached locally and available offline.
+Required:
+Dedicated tab/section in main navigation
+Grid or list view of saved recipes (designer's call; consider toggle)
+Search/filter within favorites
+Visible offline indicator if the user is offline (e.g., &quot;Showing your saved recipes — you're offline&quot;)
+Empty state for users who have not saved anything yet — should invite them to search and save
+Remove-from-favorites action with undo / confirmation appropriate to the gesture
+Feature 4 — &quot;What's in My Fridge&quot; Mode
+A distinct entry point for ingredient-driven discovery. The user enters ingredients they have on hand; the app finds recipes that maximize use of those ingredients.
+Required:
+Separate entry point from main search (could be a tab, a CTA on home, or a filter mode — designer's call, but it must feel distinct)
+Ingredient input UI: typing with autocomplete, chip-style display of added ingredients
+Add and remove ingredients easily
+Results show: how many of &quot;your&quot; ingredients each recipe uses, how many extra ingredients it requires
+Visual distinction between &quot;ingredients you have&quot; and &quot;ingredients you need to buy&quot;
+Empty state and onboarding — first-time users should immediately understand what to do
+Feature 5 — Personal Preferences
+A settings screen where the user sets defaults that apply silently to every search. This is what makes the app feel personal.
+Required fields:
+Default diet (applied to searches unless overridden)
+Intolerances (hard filter, never overridden by search)
+Optional daily calorie target (used to highlight recipes that fit)
+Preferred unit system (US / metric)
+Theme preference (light / dark / system) — see notes below
+Data management: export-my-data button, clear-my-data button (with confirmation)
+Behavior:
+Changes save automatically — no &quot;save&quot; button required
+First-time user experience: gently prompt new users to set preferences (but do not block them from using the app)
+4. Out of Scope (do NOT design these)
+These features were considered and explicitly cut from v1. They may come in v2. Please do not design them, hint at them, or include placeholder UI for them — that creates implementation pressure that is not wanted.
+Meal planning / weekly planner
+Shopping list generation
+Nutrition logging / &quot;what did I eat today&quot; tracking
+Ingredient substitutes
+Recipe sharing or social features
+Recipe extraction from external URLs
+User accounts, login, sync
+Wine pairings
+Comments, reviews, or ratings (other than the API's built-in health score)
+Push notifications
+5. Key User Flows
+These are the primary paths users will take. Designs must support these flows fluidly.
+Flow A — First-time user
+Lands on home screen
+Sees onboarding affordance (gentle, skippable) inviting them to set diet/intolerances
+Either sets preferences or skips
+Sees a search input with example queries or featured recipes
+Searches for something or browses featured content
+Flow B — Hungry, decides what to cook
+Opens app on phone
+Searches &quot;quick dinner&quot; or applies &quot;max 30 min&quot; filter
+Browses results, taps one
+Reviews ingredients, checks they have most of them
+Taps &quot;Start Cooking&quot;
+Cooks step-by-step
+Optionally favorites the recipe at the end
+Flow C — &quot;Use what I have&quot;
+Opens app, navigates to &quot;What's in My Fridge&quot;
+Adds 4-6 ingredients they have
+Sees ranked recipes — most-matching first
+Picks one, sees clearly which ingredients they need to buy
+Either cooks or saves for later
+Flow D — Returning to a saved recipe
+Opens app (possibly offline)
+Goes to Favorites
+Finds the recipe — searches/filters within favorites if needed
+Opens it, cooks it
+Flow E — Setting up the app to be personal
+Opens Preferences from main navigation
+Sets diet, intolerances, calorie target, units
+Returns to search — sees results now reflect their settings
+6. Screen Inventory
+At minimum, please deliver designs for the following screens, in both mobile and desktop layouts:
+Home / Search (default state, with featured or suggested content)
+Search results (with filters expanded and collapsed)
+Search results — empty / no results state
+Recipe Detail — Browse Mode
+Recipe Detail — Cook Mode (one step view)
+Favorites — populated
+Favorites — empty state
+&quot;What's in My Fridge&quot; — empty / onboarding state
+&quot;What's in My Fridge&quot; — with ingredients added, showing results
+Preferences / Settings
+Offline state indicator (where it appears, what it looks like)
+Loading state (skeleton or spinner approach)
+Generic error state (e.g., API quota exceeded — designed to feel calm, not alarming)
+App icon and splash screen for PWA install
+Optional but appreciated: a short clip or storyboard of the Browse-to-Cook-Mode transition, since this is the app's signature interaction.
+7. Tone &amp; Personality Direction
+Direction: Warm &amp; Approachable
+The product personality is &quot;friendly home cook&quot; — encouraging, unintimidating, practical. Not aspirational, not clinical, not preachy about health.
+What this means in practice:
+Voice in copy: friendly and direct. &quot;Looks like nothing's here yet&quot; beats &quot;No items found.&quot;
+Empty states should feel encouraging, not empty.
+Success cues should feel like small wins, not gamification.
+Health framing should be opt-in and quietly supportive — never guilt-driven.
+Photography (the API provides recipe images) should feel real and food-forward, not over-styled. Treat image quality variance as a real constraint — designs must look good with imperfect API images.
+What to avoid:
+Clinical / data-dashboard aesthetics
+Aggressive fitness / &quot;transformation&quot; energy
+Overly precious editorial / cookbook minimalism that loses warmth
+Generic &quot;AI app&quot; aesthetic (gradient mesh + glassmorphism + sans-serif headlines) — be more intentional than that
+The visual identity (palette, typefaces, name suggestions) is up to you. Please propose a direction with rationale rather than asking for input on these — UNLESS the user (Diego) tells you at the start of the session that they want to be in the loop on naming or palette before high-fidelity screens are built. If they do, share early concepts (a few name candidates with rationale, a palette direction or two) and get sign-off before committing to full screens. This avoids iterating on finished work.
+8. Content &amp; Data Notes
+Useful context about the data shape, since it affects layout decisions:
+Recipe images come from Spoonacular at standard sizes (312x231 thumbnail, 556x370 detail). Image quality varies. Design with imperfect photography in mind.
+Recipe titles can be long (&quot;Pasta with Garlic, Scallions, Cauliflower &amp; Breadcrumbs&quot;). Plan for graceful truncation.
+Nutrition data includes calories, macros (protein/fat/carbs), and many micronutrients. Decide how much to surface and where.
+Each recipe has a &quot;health score&quot; 0-100. This is a useful signal but the name is awkward; consider whether to surface it, transform it, or hide it.
+Ingredient lists range from 3-20+ items. Instructions range from 3-15+ steps. Designs must scale.
+&quot;Ready time&quot; is in minutes and is one of the most useful signals — make it prominent.
+Diet flags (vegan, gluten-free, etc.) come as booleans. Many recipes have multiple. Decide how to display badges without overwhelming the card.
+9. Accessibility Requirements
+Non-negotiable:
+All text must meet WCAG AA contrast ratios in both light and dark themes.
+Touch targets minimum 44x44 pt on mobile.
+Cook Mode must be usable at arm's length on a phone propped on a counter — this is a real-world constraint, not a hypothetical.
+Color must never be the only signal (e.g., do not use red/green alone to indicate &quot;missing/have&quot; ingredients).
+Dark mode is a first-class theme, not an afterthought. Design both themes in parallel.
+Focus states must be visible and distinct for keyboard navigation.
+10. Requested Deliverables
+When you hand back to engineering (the next Claude conversation), please include:
+All screens listed in section 6, in both mobile and desktop, in light and dark themes
+Design tokens: a complete list of color values, typography scale, spacing scale, border-radius scale, shadow definitions
+Component inventory: buttons, inputs, cards, chips, modals, navigation — whatever you decide to use, list them
+A short &quot;designer's notes&quot; section explaining key decisions and tradeoffs
+A proposed app name and brief rationale (or 2-3 candidates if you prefer)
+Notes on any motion / micro-interactions worth implementing (kept light — this app should feel calm, not flashy)
+A favicon / app icon concept
+11. Open Questions for the Designer
+These are decisions deliberately left to you. Please address each one:
+Navigation pattern: bottom tab bar on mobile? Hamburger menu? Something else? Which patterns translate best to desktop?
+How prominent should &quot;What's in My Fridge&quot; be relative to regular search? Equal billing? Secondary entry point? A filter mode?
+How should the health score be surfaced (or transformed, or hidden)?
+Cook Mode transition: smooth animation, or hard switch? Full screen, or modal?
+Recipe card: portrait or landscape? How much info on the card vs. saved for the detail view?
+App name: open to your proposal
+Onboarding: a dedicated flow, or contextual hints? How much friction is acceptable for a &quot;set my preferences&quot; prompt?
+12. Appendix — Design Decisions Already Made
+For your reference, these decisions are locked and should not be reopened in design:
+Architecture: Local-first PWA, no backend, IndexedDB for storage
+API: Spoonacular free tier, 150 points/day budget
+Tech stack: React
+Form factor priority: Mobile-first, but desktop must also be polished and intentional
+Personality: Warm and approachable (friendly home cook)
+MVP scope: 5 features: Search, Recipe Detail + Cook Mode, Favorites, What's in My Fridge, Preferences
+Quality bar: Polished across all features (with Cook Mode as the protected anchor if tradeoffs are needed)
+Theme support: Light and dark, both first-class
+Out of scope: See section 4 — do not design meal planning, shopping lists, accounts, etc.
+End of handoff document.
