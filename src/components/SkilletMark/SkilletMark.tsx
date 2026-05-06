@@ -12,9 +12,10 @@ export function SkilletMark({ size = 32, color = 'var(--color-accent)' }: Skille
   return (
     <svg width={size} height={size} viewBox="0 0 36 36" aria-hidden="true">
       <circle cx="17" cy="20" r="11" fill={color} />
-      <path d="M28 20 L34 20" stroke={color} strokeWidth={3} strokeLinecap="round" />
-      <circle cx="14" cy="17" r="1.4" fill="#fff" opacity="0.7" />
-      <circle cx="20" cy="22" r="1" fill="#fff" opacity="0.5" />
+      <path d="M28 20 L34 20" stroke={color} strokeWidth={3.4} strokeLinecap="round" />
+      <circle cx="13.5" cy="17" r="1.8" fill="#fff" opacity="0.85" />
+      <circle cx="20" cy="22" r="1.2" fill="#fff" opacity="0.55" />
+      <circle cx="17" cy="14" r="1" fill="var(--color-honey)" />
     </svg>
   );
 }
