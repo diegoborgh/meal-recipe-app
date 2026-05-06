@@ -1,0 +1,130 @@
+/*
+ * Skillet design tokens.
+ * Source of truth: docs/design-handoff/project/tokens.jsx
+ * Translated 1:1 — do not invent values; do not hard-code these in components.
+ *
+ * Naming maps to the design system: --color-bg, --color-ink, --space-*, --radius-*, etc.
+ * The design's `T()` accessor names (bg, ink, accent, r12, shadowMd) are kept as a
+ * legacy alias block at the bottom for one-shot lookup against the prototypes.
+ */
+
+:root {
+  /* ── Backgrounds ───────────────────────────────────────────────── */
+  --color-bg:           #F6F1E8;   /* warm cream — app background */
+  --color-bg-deep:      #EFE7D8;   /* pressed / inset */
+  --color-surface:      #FFFEFA;   /* cards, sheets */
+  --color-surface-alt:  #FBF5EA;   /* alt rows */
+
+  /* ── Ink (text) ────────────────────────────────────────────────── */
+  --color-ink:          #2A1F17;   /* primary */
+  --color-ink-soft:     #6B5A4A;   /* secondary */
+  --color-ink-muted:    #9C8C7C;   /* tertiary, captions */
+
+  /* ── Accents ───────────────────────────────────────────────────── */
+  --color-accent:       #C0502B;   /* terracotta — primary action / brand */
+  --color-accent-ink:   #FFFFFF;
+  --color-accent-2:     #7A8951;   /* olive — secondary, success-ish */
+  --color-honey:        #E8B25C;   /* honey — tertiary, highlights */
+
+  /* ── Lines ─────────────────────────────────────────────────────── */
+  --color-line:         #E6DDD0;
+  --color-line-soft:    #EFE7D8;
+
+  /* ── System ────────────────────────────────────────────────────── */
+  --color-danger:       #9C3A1F;
+  --color-warn:         #C97A1F;
+
+  /* ── Diet badge tones (from components.jsx DietBadge) ─────────── */
+  --badge-olive-bg:     #EEF0DC;
+  --badge-olive-fg:     #4F5A2E;
+  --badge-rose-bg:      #F5E2D6;
+  --badge-rose-fg:      #8A4226;
+  --badge-honey-bg:     #F8EBD0;
+  --badge-honey-fg:     #7A571A;
+  --badge-cream-bg:     #FBF5EA;
+  --badge-cream-fg:     var(--color-ink-soft);
+
+  /* ── Typography ───────────────────────────────────────────────── */
+  --font-display:       'Fraunces', Georgia, serif;
+  --font-body:          'Inter', -apple-system, system-ui, sans-serif;
+
+  /* ── Radii ────────────────────────────────────────────────────── */
+  --radius-4:           4px;
+  --radius-6:           6px;
+  --radius-8:           8px;
+  --radius-12:          12px;
+  --radius-16:          16px;
+  --radius-24:          24px;
+  --radius-pill:        999px;
+
+  /* ── Shadows ──────────────────────────────────────────────────── */
+  --shadow-sm:          0 1px 2px rgba(40, 30, 20, 0.06);
+  --shadow-md:          0 6px 20px rgba(40, 30, 20, 0.08), 0 1px 2px rgba(40, 30, 20, 0.04);
+  --shadow-lg:          0 16px 40px rgba(40, 30, 20, 0.12), 0 2px 6px rgba(40, 30, 20, 0.06);
+
+  /* ── Spacing scale (4px base — derived, not in tokens.jsx) ────── */
+  /* Recorded in docs/decisions.md once the first commit lands. */
+  --space-1:            4px;
+  --space-2:            8px;
+  --space-3:            12px;
+  --space-4:            16px;
+  --space-5:            20px;
+  --space-6:            24px;
+  --space-8:            32px;
+  --space-10:           40px;
+  --space-12:           48px;
+  --space-16:           64px;
+
+  /* ── Layout ───────────────────────────────────────────────────── */
+  --bp-tablet:          768px;
+  --bp-desktop:         1024px;
+  --sidebar-w:          240px;     /* desktop persistent sidebar */
+  --mobile-nav-h:       78px;      /* mobile bottom tab bar */
+  --safe-bottom:        env(safe-area-inset-bottom, 0px);
+  --safe-top:           env(safe-area-inset-top, 0px);
+
+  /* ── Motion ───────────────────────────────────────────────────── */
+  --ease-out:           cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out:        cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:           120ms;
+  --dur-base:           200ms;
+  --dur-slow:           320ms;
+
+  /* ── Touch targets ────────────────────────────────────────────── */
+  --touch-min:          44px;      /* WCAG / Apple HIG */
+
+  color-scheme: light;
+}
+
+/*
+ * Cook Mode B theme override.
+ * Scoped to the .cook-mode class on the route layout — do NOT apply globally.
+ * Dark cream surface + honey accent, high-contrast for at-distance reading.
+ */
+.cook-mode {
+  --color-bg:           #1F1611;   /* near-black warm */
+  --color-bg-deep:      #15100C;
+  --color-surface:      #2A1F17;   /* the original ink, repurposed as surface */
+  --color-surface-alt:  #3A2C22;
+
+  --color-ink:          #F6F1E8;   /* cream as ink */
+  --color-ink-soft:     #D9CDB8;
+  --color-ink-muted:    #9C8C7C;
+
+  --color-accent:       #E8B25C;   /* honey is the action color in Cook Mode */
+  --color-accent-ink:   #1F1611;
+
+  --color-line:         #3A2C22;
+  --color-line-soft:    #2A1F17;
+
+  color-scheme: dark;
+}
+
+/* Reduced motion — respect user preference everywhere except essential transitions */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

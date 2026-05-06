@@ -1,0 +1,42 @@
+/*
+ * RootLayout — responsive shell that switches between mobile bottom-nav and
+ * desktop sidebar. One layout, two chrome variants. Body content is scrollable;
+ * chrome is sticky.
+ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.shellWithSidebar {
+  flex-direction: row;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* On desktop, give content a comfortable max-width and center it inside main. */
+.contentDesktop {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 56px;
+}
+
+/* On mobile/tablet, reserve space at the bottom for the nav bar. */
+.contentMobile {
+  padding-bottom: calc(var(--mobile-nav-h) + var(--safe-bottom));
+}

@@ -1,0 +1,21 @@
+/*
+ * CookModeLayout — edge-to-edge, no nav chrome. The dark theme tokens are
+ * scoped via the global `.cook-mode` class (defined in tokens.css), which
+ * is applied alongside this module's class on the layout root.
+ */
+
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  /* Defensive: nothing else mounts above the cook surface. */
+  overflow-x: hidden;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}

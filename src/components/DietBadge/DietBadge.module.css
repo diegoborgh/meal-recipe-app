@@ -1,0 +1,16 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.olive { background: var(--badge-olive-bg); color: var(--badge-olive-fg); }
+.rose  { background: var(--badge-rose-bg);  color: var(--badge-rose-fg); }
+.honey { background: var(--badge-honey-bg); color: var(--badge-honey-fg); }
+.cream { background: var(--badge-cream-bg); color: var(--badge-cream-fg); }

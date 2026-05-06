@@ -1,0 +1,80 @@
+/*
+ * Typography utilities. Intentionally lean — most type is set by components inline
+ * via tokens. These classes exist for editorial blocks (recipe detail body, empty states)
+ * where we want consistency without per-element styling.
+ */
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-ink);
+  background: var(--color-bg);
+}
+
+.t-display-xl {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.6px;
+}
+
+.t-display-lg {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.4px;
+}
+
+.t-display-md {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+
+.t-display-sm {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.t-body-sm {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+
+.t-caption {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
+}
+
+.t-eyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+/* Tabular numerals for metrics (calories, time, servings) */
+.t-tnum {
+  font-variant-numeric: tabular-nums;
+}
