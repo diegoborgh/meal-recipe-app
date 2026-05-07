@@ -1,0 +1,1 @@
+- Collapsible desktop filter sidebar

@@ -1,0 +1,57 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: var(--touch-min);
+}
+
+.row.divider {
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-6);
+  border: 1.5px solid var(--color-line);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.checkboxChecked {
+  background: var(--color-accent-2);
+  border-color: var(--color-accent-2);
+}
+
+.name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-ink-soft);
+  text-wrap: pretty;
+  line-height: 1.35;
+}
+
+.nameChecked {
+  color: var(--color-ink);
+}
+
+.amount {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.amountValue {
+  color: var(--color-ink);
+  font-weight: 600;
+}

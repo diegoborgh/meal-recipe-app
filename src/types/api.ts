@@ -59,6 +59,81 @@ export interface SpoonacularSearchResponse {
   totalResults: number;
 }
 
+/** Per-ingredient amount in a single unit system. */
+export interface SpoonacularMeasure {
+  amount: number;
+  unitShort: string;
+  unitLong: string;
+}
+
+export interface SpoonacularExtendedIngredient {
+  id: number;
+  /** Lowercase canonical name. */
+  name: string;
+  /** Full text as it appeared in the source ("4 salmon fillets, skin-on"). */
+  original: string;
+  /** Defaults to US — when unit-toggle is off. */
+  amount: number;
+  unit: string;
+  measures: {
+    us: SpoonacularMeasure;
+    metric: SpoonacularMeasure;
+  };
+  image?: string;
+  aisle?: string;
+}
+
+export interface SpoonacularStep {
+  number: number;
+  step: string;
+  ingredients?: { id: number; name: string; image?: string }[];
+  equipment?: { id: number; name: string; image?: string }[];
+  length?: { number: number; unit: string };
+}
+
+export interface SpoonacularInstructionSet {
+  /** Section name — most recipes have a single unnamed set. */
+  name: string;
+  steps: SpoonacularStep[];
+}
+
+/**
+ * /recipes/{id}/information response. Spoonacular returns ~50 fields;
+ * we narrow to what Skillet renders.
+ */
+export interface SpoonacularRecipeInfo {
+  id: number;
+  title: string;
+  image?: string;
+  imageType?: string;
+  servings: number;
+  readyInMinutes?: number;
+  cookingMinutes?: number;
+  preparationMinutes?: number;
+  vegetarian?: boolean;
+  vegan?: boolean;
+  glutenFree?: boolean;
+  dairyFree?: boolean;
+  veryHealthy?: boolean;
+  ketogenic?: boolean;
+  whole30?: boolean;
+  /** Locked decision: never surfaced. */
+  healthScore?: number;
+  diets?: string[];
+  dishTypes?: string[];
+  cuisines?: string[];
+  sourceName?: string;
+  sourceUrl?: string;
+  creditsText?: string;
+  /** HTML summary; we don't render raw HTML, but useful for SEO/preview. */
+  summary?: string;
+  extendedIngredients: SpoonacularExtendedIngredient[];
+  analyzedInstructions: SpoonacularInstructionSet[];
+  /** Plain HTML fallback when analyzedInstructions is empty. */
+  instructions?: string;
+  nutrition?: SpoonacularNutrition;
+}
+
 /** /recipes/autocomplete returns an array of these. */
 export interface SpoonacularAutocompleteHit {
   id: number;

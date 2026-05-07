@@ -10,10 +10,17 @@
  */
 
 import type {
+  SpoonacularExtendedIngredient,
   SpoonacularNutrient,
+  SpoonacularRecipeInfo,
   SpoonacularSearchHit,
 } from '@/types/api';
-import type { RecipeBadge, RecipeSummary } from '@/types/recipe';
+import type {
+  Recipe,
+  RecipeBadge,
+  RecipeIngredient,
+  RecipeSummary,
+} from '@/types/recipe';
 
 /** Pretty time string. Falls back to null when minutes are missing. */
 export function formatReadyTime(minutes: number | undefined): string | null {
@@ -82,4 +89,104 @@ export function toRecipeSummary(hit: SpoonacularSearchHit): RecipeSummary {
     image: hit.image,
     badges: badgesFor(hit),
   };
+}
+
+/** Convert a Spoonacular extendedIngredient into an app-internal RecipeIngredient. */
+function toIngredient(raw: SpoonacularExtendedIngredient): RecipeIngredient {
+  return {
+    id: raw.id,
+    name: raw.name,
+    original: raw.original,
+    amount: {
+      us: {
+        value: raw.measures?.us?.amount ?? raw.amount,
+        unit: raw.measures?.us?.unitShort ?? raw.unit,
+      },
+      metric: {
+        value: raw.measures?.metric?.amount ?? raw.amount,
+        unit: raw.measures?.metric?.unitShort ?? raw.unit,
+      },
+    },
+  };
+}
+
+/**
+ * Pull the structured step list out of analyzedInstructions, falling back to
+ * a naïve split of the HTML `instructions` field if it's empty.
+ *
+ * We strip HTML tags from the fallback rather than render dangerouslySetInnerHTML —
+ * Spoonacular content is third-party and "calm, not alarming" includes XSS-safe.
+ */
+function extractSteps(info: SpoonacularRecipeInfo): string[] {
+  const sets = info.analyzedInstructions ?? [];
+  const fromAnalyzed = sets.flatMap((s) => s.steps.map((step) => step.step.trim()));
+  if (fromAnalyzed.length > 0) return fromAnalyzed.filter(Boolean);
+
+  if (info.instructions) {
+    const text = info.instructions.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    // Split on sentence boundaries — coarse but good enough for the fallback.
+    return text
+      .split(/(?<=\.)\s+(?=[A-Z])/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+/** Map a /recipes/{id}/information response into a full Recipe. */
+export function toRecipe(info: SpoonacularRecipeInfo): Recipe {
+  const summary = toRecipeSummary(info as unknown as SpoonacularSearchHit);
+  const nutrients = info.nutrition?.nutrients;
+  return {
+    ...summary,
+    servings: info.servings,
+    sourceName: info.sourceName,
+    sourceUrl: info.sourceUrl,
+    ingredients: (info.extendedIngredients ?? []).map(toIngredient),
+    steps: extractSteps(info),
+    nutrition: {
+      calories: findNutrient(nutrients, 'Calories'),
+      protein: findNutrient(nutrients, 'Protein'),
+      carbs: findNutrient(nutrients, 'Carbohydrates'),
+      fat: findNutrient(nutrients, 'Fat'),
+    },
+  };
+}
+
+/* ── Servings + amount formatting ──────────────────────────────────────── */
+
+/**
+ * Pretty amount string. Renders fractions for common values (½, ¼, ⅓, ⅔, ¾)
+ * and decimals otherwise. Trims trailing zeros.
+ */
+export function formatAmount(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '';
+  // Fractions are kinder than 0.5 / 0.333 in a recipe context.
+  const fractions: Record<string, string> = {
+    '0.25': '¼',
+    '0.33': '⅓',
+    '0.333': '⅓',
+    '0.5': '½',
+    '0.66': '⅔',
+    '0.666': '⅔',
+    '0.667': '⅔',
+    '0.75': '¾',
+  };
+  const whole = Math.floor(value);
+  const remainder = value - whole;
+  const remKey = remainder.toFixed(remainder < 0.4 ? 3 : 2);
+  const frac = fractions[remKey];
+  if (frac) return whole > 0 ? `${whole} ${frac}` : frac;
+  // Otherwise: trim to 2 decimals, drop trailing zeros.
+  const rounded = Math.round(value * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded);
+}
+
+/**
+ * Scale an amount by the new servings ratio. Returns the same unit (Spoonacular
+ * units don't change with quantity in the API — ml stays ml, tbsp stays tbsp).
+ */
+export function scaleAmount(value: number, originalServings: number, newServings: number): number {
+  if (originalServings <= 0) return value;
+  return (value * newServings) / originalServings;
 }

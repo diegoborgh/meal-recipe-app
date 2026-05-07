@@ -1,0 +1,189 @@
+/*
+ * Recipe Detail layout. Mobile and desktop diverge significantly:
+ *
+ * Mobile: hero bleeds top + status-bar area, content sheet pulled up over hero
+ * with a 24px top radius. Sticky "Start cooking" CTA at the bottom edge.
+ *
+ * Desktop: traditional 2-column layout (1.4fr / 1fr). Hero is a rounded card
+ * that lives inside the left column. The CTA lives at the bottom of the right
+ * column rather than as a sticky overlay.
+ *
+ * RootLayout already pads desktop content (max-width + 32/56 padding); we
+ * neutralize that on the mobile path so the hero can be edge-to-edge.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Mobile path --- */
+
+.mobileShell {
+  display: flex;
+  flex-direction: column;
+  /* Bleed beyond RootLayout's contentMobile padding. The mobile content path
+     in RootLayout has 0 horizontal padding by default; we just need to undo
+     the bottom-pad to keep the sticky CTA flush. */
+  margin-bottom: calc(var(--mobile-nav-h) * -1 - var(--safe-bottom));
+}
+
+.mobileSheet {
+  flex: 1;
+  background: var(--color-bg);
+  margin-top: -28px;
+  border-top-left-radius: var(--radius-24);
+  border-top-right-radius: var(--radius-24);
+  padding: 20px 22px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.mobileBadges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.mobileTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+  line-height: 1.12;
+  color: var(--color-ink);
+  text-wrap: pretty;
+}
+
+.attribution {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.attribution a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.attribution a:hover { text-decoration: underline; }
+
+.mobileSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--color-ink);
+}
+
+.mobileSectionMeta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobileCta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--mobile-nav-h) + var(--safe-bottom));
+  padding: 12px 22px 18px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(246, 241, 232, 0.95) 30%,
+    var(--color-bg) 60%
+  );
+  z-index: 5;
+  pointer-events: none; /* let the gradient be visual-only */
+}
+
+.mobileCta > * {
+  pointer-events: auto;
+}
+
+/* --- Desktop path --- */
+
+.desktopBack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+.desktopBack:hover { color: var(--color-ink); }
+
+.desktopGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+}
+
+.desktopLeft,
+.desktopRight {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.desktopRight {
+  gap: 18px;
+}
+
+.desktopHeading {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.6px;
+  line-height: 1.08;
+  color: var(--color-ink);
+  text-wrap: pretty;
+}
+
+.desktopSectionTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--color-ink);
+}
+
+.desktopIngredientsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktopIngredientsControls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.desktopCta {
+  margin-top: 8px;
+}
+
+.errorWrap {
+  padding: 40px 22px;
+}

@@ -65,6 +65,26 @@ Entries should be brief. Format:
 **Why:** RecipeCard needs `readyInMinutes` + calories + the boolean flags for diet badges. Without `addRecipeInformation` we'd need a second per-recipe call. `instructionsRequired` filters out recipes we couldn't show in Cook Mode anyway.
 **Reversible?** Yes — three flags in `src/api/search.ts`.
 
+## 2026-05-06 — Recipe detail: servings + units are local UI state, not preferences
+**Decision:** On Recipe Detail, the `ServingsAdjuster` and `UnitToggle` mutate component-local state only. Units initializes from `preferences.units` at mount but doesn't write back; servings always initializes to the recipe's original count.
+**Why:** A user looking at one recipe in metric shouldn't change their global default. Servings shouldn't persist either — every recipe arrives at its own original count.
+**Reversible?** Yes — wire `setPreferences` into the toggle if behavior should change.
+
+## 2026-05-06 — Servings scaling preserves units; we don't unit-convert ourselves
+**Decision:** When the user adjusts servings, we scale the numeric `amount` only. Units stay as Spoonacular returned them. For the US/Metric switch, we read the right pre-converted measure from `extendedIngredients[i].measures.us|metric` rather than running our own conversion.
+**Why:** Spoonacular has already done unit-aware conversions per ingredient — applying our own would risk double-conversion bugs and lose Spoonacular's unit choices ("can (15 oz)" vs "g"). Numeric scaling is mathematically safe.
+**Reversible?** With effort — would require a custom conversion layer.
+
+## 2026-05-06 — Plain text instructions only; no rendered HTML from the API
+**Decision:** `extractSteps` prefers `analyzedInstructions[].steps[].step` (plain text). Falls back to a coarse sentence-split of the HTML `instructions` field with tags stripped — never `dangerouslySetInnerHTML`.
+**Why:** Spoonacular content is third-party; rendering its HTML on a route that loads any user-supplied id from the URL would be an XSS hole. Coarse split is fine for a fallback.
+**Reversible?** Yes — wire DOMPurify if we ever want richer fallback rendering.
+
+## 2026-05-06 — `vercel.json` keeps framework + install/build only, no devCommand
+**Decision:** `vercel.json` declares `framework: "vite"`, `installCommand`, `buildCommand`, `outputDirectory`, and nothing else. No `devCommand`.
+**Why:** Setting `devCommand: "npm run dev"` made `vercel dev` run Vite as a passthrough without starting Vercel's own server — so `/api/spoonacular` was unreachable locally even though Vite came up on 5173. Removing `devCommand` lets Vercel auto-detect Vite, mount the API function, and serve the combined stack on its own port (default 3000).
+**Reversible?** Yes — re-add `devCommand` if a future framework change requires it, but verify `vercel dev` still announces its own port.
+
 ## 2026-05-05 — Added `@vercel/node` as a devDependency
 **Decision:** Pulled in `@vercel/node` for `VercelRequest` / `VercelResponse` types in `api/spoonacular.ts`.
 **Why:** Standard package for typing Vercel Serverless Functions; not flagged as "obvious" in the build prompt but it's the official source of those types.

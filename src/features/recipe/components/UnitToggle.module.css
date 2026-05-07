@@ -1,0 +1,29 @@
+.wrap {
+  display: inline-flex;
+  background: var(--color-bg-deep);
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.option {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
+.optionActive {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+}

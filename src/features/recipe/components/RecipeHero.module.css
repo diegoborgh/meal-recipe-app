@@ -1,0 +1,103 @@
+/*
+ * Two presentations:
+ *   - Mobile (.mobile): full-bleed, 320px tall, slight gradient overlay, content
+ *     scrolls beneath via the negative-margin trick used in the design.
+ *   - Desktop (.desktop): rounded card, 16:10 aspect, lives inside the column grid.
+ *
+ * Both share the same image + overlay button slots.
+ */
+
+.heroMobile {
+  position: relative;
+  height: 320px;
+  flex-shrink: 0;
+  background: var(--color-bg-deep);
+  overflow: hidden;
+}
+
+.heroMobile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 30, 20, 0.35) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  pointer-events: none;
+}
+
+.heroDesktop {
+  position: relative;
+  border-radius: var(--radius-16);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--color-bg-deep);
+  flex-shrink: 0;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageFallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-muted);
+  background: linear-gradient(135deg, var(--color-bg-deep), var(--color-surface-alt));
+}
+
+.controls {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.controlsTop {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--safe-top) 22px 0;
+  margin-top: 8px;
+}
+
+.heroDesktop .controlsTop {
+  padding: 14px;
+  margin-top: 0;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 254, 250, 0.92);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+}
+
+.heroDesktop .iconBtn {
+  width: 44px;
+  height: 44px;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 254, 250, 1);
+}
