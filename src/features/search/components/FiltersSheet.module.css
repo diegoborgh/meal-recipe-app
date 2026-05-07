@@ -1,0 +1,78 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(40, 30, 20, 0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: scrimIn var(--dur-base) var(--ease-out);
+}
+
+.sheet {
+  background: var(--color-surface);
+  border-top-left-radius: var(--radius-24);
+  border-top-right-radius: var(--radius-24);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 22px calc(28px + var(--safe-bottom));
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  animation: sheetIn var(--dur-base) var(--ease-out);
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-line);
+  border-radius: 4px;
+  margin: 0 auto 16px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.reset {
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.body {
+  overflow: auto;
+  flex: 1;
+}
+
+.foot {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+@keyframes scrimIn {
+  from { background: rgba(40, 30, 20, 0); }
+  to   { background: rgba(40, 30, 20, 0.45); }
+}
+
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .sheet { animation: none; }
+}

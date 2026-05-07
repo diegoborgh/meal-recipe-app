@@ -45,6 +45,26 @@ Entries should be brief. Format:
 **Why:** Manifest needs PNGs for cross-platform installability (especially iOS) and Lighthouse PWA score. Generating from one SVG keeps the source-of-truth single. Sharp is build-time only — never imported by runtime code.
 **Reversible?** Yes — drop sharp + the script if we switch to a different rasterizer or ship SVG-only icons.
 
+## 2026-05-06 — URL is the source of truth for search filter state
+**Decision:** SearchRoute reads filter state via `useSearchParams` and writes back through `setSearchParams`. The reducer (`filtersReducer`) is pure; route code derives current filters per render from the URL and projects each action through the reducer + serializer.
+**Why:** Back/forward navigates filter history naturally; deep links work; no stale local state to reconcile against the URL. The mobile FiltersSheet still uses a local `useReducer` for its draft (so chip toggles inside the sheet don't fire one search per click) and only commits via Apply.
+**Reversible?** Yes — could move to local state if URL sync becomes constraining.
+
+## 2026-05-06 — Diet is single-select; intolerances are multi
+**Decision:** UI mirrors Spoonacular's API: `diet` is a single value, `intolerances` is comma-separated. Toggling a different diet replaces the selection; toggling an intolerance adds/removes it.
+**Why:** Spoonacular's complexSearch only accepts one `diet` value. Faking multi-select would silently drop selections.
+**Reversible?** No — would require a different upstream provider.
+
+## 2026-05-06 — Sort options deferred from MVP
+**Decision:** Search is hard-coded to `sort=popularity` (or `sort=random` for the Home "Tonight's picks" strip). The "Sort: Best match" dropdown shown in the design is not built. The Filters type carries a `sort` field so we can expose it without re-plumbing later.
+**Why:** Sort isn't in the locked MVP feature list. Adding it would expand surface area for marginal value before Recipe Detail and Cook Mode are built. Keep slice 2 scoped.
+**Reversible?** Yes — wire a SortDropdown component when needed.
+
+## 2026-05-06 — Spoonacular complexSearch flags
+**Decision:** Every complexSearch call is made with `addRecipeInformation=true`, `addRecipeNutrition=true`, `instructionsRequired=true`. Page size is 12 (within the 12–20 range from build-prompt.md).
+**Why:** RecipeCard needs `readyInMinutes` + calories + the boolean flags for diet badges. Without `addRecipeInformation` we'd need a second per-recipe call. `instructionsRequired` filters out recipes we couldn't show in Cook Mode anyway.
+**Reversible?** Yes — three flags in `src/api/search.ts`.
+
 ## 2026-05-05 — Added `@vercel/node` as a devDependency
 **Decision:** Pulled in `@vercel/node` for `VercelRequest` / `VercelResponse` types in `api/spoonacular.ts`.
 **Why:** Standard package for typing Vercel Serverless Functions; not flagged as "obvious" in the build prompt but it's the official source of those types.

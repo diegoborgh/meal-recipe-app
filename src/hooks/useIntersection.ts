@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 
 export interface UseIntersectionOptions {
   rootMargin?: string;
@@ -14,7 +14,7 @@ export interface UseIntersectionOptions {
  */
 export function useIntersection<T extends Element>(
   options: UseIntersectionOptions = {},
-): [React.RefObject<T | null>, boolean] {
+): [MutableRefObject<T | null>, boolean] {
   const ref = useRef<T | null>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const { rootMargin, threshold, once } = options;

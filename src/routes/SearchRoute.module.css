@@ -1,0 +1,129 @@
+/*
+ * SearchRoute layout. Mobile/tablet: stacked header → grid, filters live in a
+ * bottom sheet. Desktop: 280px filters sidebar + flexible results column.
+ *
+ * The desktop sidebar lives INSIDE this route (not RootLayout) — it's
+ * search-specific.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+@media (min-width: 1024px) {
+  .header {
+    padding: 0 0 18px;
+    border-bottom: 0;
+    position: static;
+  }
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+@media (min-width: 1024px) {
+  .iconBtn { display: none; }
+}
+
+.searchInputWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.bodyMobile {
+  flex-direction: column;
+  padding: 14px 22px 22px;
+  gap: 12px;
+}
+
+.bodyDesktop {
+  flex-direction: row;
+  gap: 28px;
+  padding: 0;
+}
+
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 8px 0 24px;
+  border-right: 1px solid var(--color-line);
+  padding-right: 28px;
+  align-self: stretch;
+}
+
+.sidebarHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+
+.sidebarTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.reset {
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.results {
+  flex: 1;
+  min-width: 0;
+}
+
+.resultsMeta {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  margin-bottom: 12px;
+}
+
+@media (min-width: 1024px) {
+  .resultsMeta { margin-bottom: 18px; }
+}
+
+.resultsMetaCount {
+  color: var(--color-ink);
+  font-weight: 600;
+}

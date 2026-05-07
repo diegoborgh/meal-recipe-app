@@ -1,19 +1,137 @@
+import { useNavigate } from 'react-router-dom';
+import { Icon } from '@/components/Icon';
 import { SkilletWordmark } from '@/components/SkilletWordmark';
+import { Button } from '@/components/Button';
+import { ErrorState } from '@/components/states';
+import { useIsDesktop } from '@/hooks/useBreakpoint';
+import { HeroSearch } from '@/features/search/components/HeroSearch';
+import { QuickChips } from '@/features/search/components/QuickChips';
+import {
+  ResultsGrid,
+  ResultsSkeleton,
+} from '@/features/search/components/ResultsGrid';
+import { useRecipeSearch } from '@/features/search/hooks/useRecipeSearch';
+import { filtersToSearchParams } from '@/features/search/filters';
+import { EMPTY_FILTERS } from '@/features/search/types';
+import styles from './HomeRoute.module.css';
 
-/** "/" — Cook tab landing. Replaced in slice 2 (search) with the real Home. */
+/**
+ * Home — the "Cook" tab landing. Hero + quick filters + a 4-card "Tonight's
+ * picks" row. Submitting the search box navigates to /search; the chip row
+ * does the same with prefilled filters.
+ */
 export function HomeRoute() {
-  return (
-    <section style={{ padding: '24px 20px' }}>
-      <SkilletWordmark size={28} />
-      <h1
-        className="t-display-lg"
-        style={{ marginTop: 24, marginBottom: 8 }}
-      >
-        Come into the <em style={{ color: 'var(--color-accent)', fontStyle: 'italic' }}>kitchen</em>.
-      </h1>
-      <p className="t-body" style={{ color: 'var(--color-ink-soft)' }}>
-        Scaffold ready. Search lands in slice 2.
-      </p>
-    </section>
+  const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
+
+  // "Tonight's picks": light, opinionated query so the home isn't empty.
+  // Sort=random keeps it from feeling stale across visits; cached at the edge.
+  const { results, loading, error, quotaExceeded, refetch } = useRecipeSearch(
+    { sort: 'random', number: isDesktop ? 4 : 4 },
+    true,
   );
+
+  const goToSearch = (text: string) => {
+    const sp = filtersToSearchParams({ ...EMPTY_FILTERS, query: text });
+    navigate(`/search${sp.toString() ? `?${sp.toString()}` : ''}`);
+  };
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.headerBar}>
+        <SkilletWordmark size={20} />
+        <button
+          type="button"
+          className={styles.headerButton}
+          aria-label="Preferences"
+          onClick={() => navigate('/preferences')}
+        >
+          <Icon name="settings" size={18} />
+        </button>
+      </div>
+
+      <div className={styles.eyebrow}>{currentDayLabel()}</div>
+      <h1 className={styles.hero}>
+        {isDesktop ? (
+          <>
+            Come into the <em className={styles.heroAccent}>kitchen</em>.
+          </>
+        ) : (
+          <>
+            Come into<br />the <em className={styles.heroAccent}>kitchen</em>.
+          </>
+        )}
+      </h1>
+      <p className={styles.subhead}>
+        {isDesktop ? 'What sounds good tonight?' : 'Tuesday — what are we cooking?'}
+      </p>
+
+      <div className={styles.searchRow}>
+        <div className={styles.searchRowInput}>
+          <HeroSearch
+            value=""
+            size={isDesktop ? 'lg' : 'md'}
+            placeholder="Try 'quick dinner', 'salmon', 'pasta'…"
+            onSubmit={(text) => goToSearch(text)}
+          />
+        </div>
+        {isDesktop && (
+          <Button
+            variant="outline"
+            size="lg"
+            leadIcon="filter"
+            onClick={() => navigate('/search')}
+          >
+            Filters
+          </Button>
+        )}
+      </div>
+
+      <div className={styles.chipsRow}>
+        <QuickChips />
+      </div>
+
+      <div className={styles.sectionHead}>
+        <div className={styles.sectionTitle}>Tonight’s picks</div>
+        <button
+          type="button"
+          className={styles.sectionLink}
+          onClick={() => navigate('/search')}
+        >
+          See all →
+        </button>
+      </div>
+
+      {loading && <ResultsSkeleton count={4} />}
+      {!loading && error && (
+        <ErrorState
+          {...(quotaExceeded
+            ? {
+                title: 'Caught our breath.',
+                body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
+              }
+            : {})}
+          onRetry={refetch}
+        />
+      )}
+      {!loading && !error && (
+        <ResultsGrid
+          results={results.slice(0, 4)}
+          hasMore={false}
+          loadingMore={false}
+          onLoadMore={() => {
+            /* Home shows a fixed-size strip; no infinite scroll here. */
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/** "Tuesday · 6:42 pm"-style eyebrow. Pulls from the user's locale. */
+function currentDayLabel(): string {
+  const now = new Date();
+  const day = now.toLocaleDateString(undefined, { weekday: 'long' });
+  const time = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return `${day} · ${time.toLowerCase()}`;
 }
