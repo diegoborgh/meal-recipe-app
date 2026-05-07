@@ -1,0 +1,106 @@
+/*
+ * CookStep — the main reading area. Mobile = stacked (number on top, text
+ * below), desktop = 2-col grid (massive number on left, text on right).
+ *
+ * Type sizes are deliberately large per the build prompt: "Cook Mode must be
+ * readable on a phone propped on a counter at arm's length."
+ */
+
+.frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px 32px 24px;
+  color: #fff;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .frame {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 80px;
+    gap: 80px;
+  }
+}
+
+.numberWrap {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .numberWrap {
+    flex: 1;
+  }
+}
+
+.number {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -2px;
+  color: var(--color-honey);
+  font-variant-numeric: tabular-nums;
+  font-size: 64px;
+}
+
+@media (min-width: 1024px) {
+  .number {
+    font-size: 200px;
+    line-height: 0.85;
+    letter-spacing: -6px;
+  }
+}
+
+.numberOf {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.numberOf.mobile {
+  font-size: 24px;
+}
+
+.numberSubtitle {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .numberSubtitle {
+    display: block;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.text {
+  font-family: var(--font-body);
+  font-size: 26px;
+  line-height: 1.32;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  color: #fff;
+  text-wrap: pretty;
+}
+
+@media (min-width: 1024px) {
+  .text {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: -0.4px;
+  }
+}

@@ -1,0 +1,80 @@
+.bar {
+  display: flex;
+  gap: 10px;
+  padding: 0 22px calc(30px + var(--safe-bottom));
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .bar {
+    padding: 28px 80px 36px;
+    gap: 14px;
+    justify-content: flex-end;
+  }
+}
+
+.btn {
+  height: 72px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  border: 0;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.btn:not(:disabled):active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (min-width: 1024px) {
+  .btn { height: 64px; }
+}
+
+.back {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.back:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+@media (min-width: 1024px) {
+  .back { flex: 0 0 auto; padding: 0 28px; }
+}
+
+.next {
+  flex: 2;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.next:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+@media (min-width: 1024px) {
+  .next { flex: 0 0 auto; padding: 0 36px; font-size: 18px; }
+}
+
+/* "Done" state — last step. Honey, signals completion. */
+.done {
+  background: var(--color-honey);
+  color: var(--color-bg);
+}
+
+.done:not(:disabled):hover {
+  filter: brightness(1.05);
+}

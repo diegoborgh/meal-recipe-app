@@ -1,0 +1,32 @@
+.dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  transition:
+    width var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+  flex-shrink: 0;
+}
+
+/* Active dot — wider honey pill. */
+.dotActive {
+  width: 28px;
+  background: var(--color-honey);
+}
+
+/* Past dot — small honey, signals progress. */
+.dotPast {
+  background: var(--color-honey);
+}
+
+@media (min-width: 1024px) {
+  .dot         { width: 12px; height: 8px; }
+  .dotActive   { width: 56px; }
+}

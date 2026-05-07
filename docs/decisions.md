@@ -65,6 +65,26 @@ Entries should be brief. Format:
 **Why:** RecipeCard needs `readyInMinutes` + calories + the boolean flags for diet badges. Without `addRecipeInformation` we'd need a second per-recipe call. `instructionsRequired` filters out recipes we couldn't show in Cook Mode anyway.
 **Reversible?** Yes — three flags in `src/api/search.ts`.
 
+## 2026-05-06 — Cook Mode theme: terracotta accent, honey highlight (corrected)
+**Decision:** The `.cook-mode` token override was initially set to use honey as `--color-accent` (the action color). Updated to keep `--color-accent` as terracotta — matching the design's Next button — and treat honey as a highlight color (step number, active progress dot). Surfaces are translucent white overlays (`rgba(255, 255, 255, 0.06)`) on a warm-dark `#2A1F17` base.
+**Why:** The first pass misread the design. With honey as accent, components rendered under cook-mode would have changed all primary affordances to yellow instead of staying terracotta — wrong visual hierarchy. The corrected scope means our shared Button/Chip/etc. work correctly under cook-mode without any conditional code.
+**Reversible?** Yes — single CSS block in tokens.css.
+
+## 2026-05-06 — Cook Mode keyboard nav: Right/Space/Enter advance, Left back, Esc exit
+**Decision:** `useCookNavigation` listens on `window` for arrow keys, Space, Enter, Esc. Editable elements (inputs, contenteditable) are exempt. Esc bubbles up via `onExit` so the route can decide what to do (e.g. close the ingredients peek before exiting Cook Mode).
+**Why:** Cooking with the phone propped up sometimes means a keyboard or paired controller is closer than the screen. Multiple "advance" keys (Right / Space / Enter) all do the right thing without thinking. Esc-handled-by-caller lets us stack modals correctly.
+**Reversible?** Yes.
+
+## 2026-05-06 — Wake Lock fails silently on unsupported browsers
+**Decision:** `useWakeLock` requests `navigator.wakeLock.request('screen')` on mount and silently no-ops where the API isn't available (Safari before 16.4, some desktop Linux). Re-acquires on `visibilitychange` because the OS releases the lock when the tab is hidden.
+**Why:** Cook Mode is still usable without the lock — the screen just dims as normal. Throwing or warning would be punishing the user for browser limitations they can't fix.
+**Reversible?** N/A — graceful degradation is the intended behavior.
+
+## 2026-05-06 — Cook Mode "Done" on the last step navigates back to Browse
+**Decision:** On the last step, the Next button becomes "Done" (honey, check icon) and fires `onDone` instead of `onNext`. `onDone` navigates back to `/recipe/:id`. Same destination as the close button.
+**Why:** The build prompt notes: "easy exit back to Browse Mode." A natural gesture at the end of cooking is to close out — making "Done" do that automatically removes a friction step. The honey color (vs terracotta) signals completion, not advancement.
+**Reversible?** Yes.
+
 ## 2026-05-06 — Recipe detail: servings + units are local UI state, not preferences
 **Decision:** On Recipe Detail, the `ServingsAdjuster` and `UnitToggle` mutate component-local state only. Units initializes from `preferences.units` at mount but doesn't write back; servings always initializes to the recipe's original count.
 **Why:** A user looking at one recipe in metric shouldn't change their global default. Servings shouldn't persist either — every recipe arrives at its own original count.

@@ -1,0 +1,124 @@
+/*
+ * IngredientsPeek — mobile is a bottom sheet (same pattern as FiltersSheet),
+ * desktop is a right-anchored side drawer that slides in from the edge.
+ *
+ * Both render against an overlay that absorbs clicks to close. Inside cook
+ * mode the surface tokens are translucent overlays — fine for the sheet
+ * panel itself, but we want a more legible solid surface here so ingredients
+ * read clearly. We override locally.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.55);
+  animation: scrimIn var(--dur-base) var(--ease-out);
+}
+
+/* Mobile: bottom sheet */
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 51;
+  background: #2A1F17;            /* solid cook bg, not the translucent overlay */
+  color: #fff;
+  border-top-left-radius: var(--radius-24);
+  border-top-right-radius: var(--radius-24);
+  padding: 12px 22px calc(28px + var(--safe-bottom));
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: sheetIn var(--dur-base) var(--ease-out);
+}
+
+/* Desktop: right-side drawer */
+@media (min-width: 1024px) {
+  .sheet {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: 420px;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-top-left-radius: var(--radius-24);
+    border-bottom-left-radius: var(--radius-24);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 28px 28px calc(28px + var(--safe-bottom));
+    animation: drawerIn var(--dur-base) var(--ease-out);
+  }
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  margin: 0 auto 16px;
+}
+
+@media (min-width: 1024px) {
+  .handle { display: none; }
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close:hover { background: rgba(255, 255, 255, 0.16); }
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  /* IngredientsList uses var(--color-surface) which under cook-mode is a
+     translucent white overlay — that reads as a card on dark, which is what
+     we want here. No override needed. */
+}
+
+@keyframes scrimIn {
+  from { background: rgba(0, 0, 0, 0); }
+  to   { background: rgba(0, 0, 0, 0.55); }
+}
+
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes drawerIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .sheet { animation: none; }
+}

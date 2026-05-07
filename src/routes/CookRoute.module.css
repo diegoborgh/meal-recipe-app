@@ -1,0 +1,46 @@
+/*
+ * Cook Mode route layout. CookModeLayout already supplies the .cook-mode class
+ * on the route container, so all token overrides apply.
+ *
+ * The screen is divided into 3 horizontal regions: top bar, step (flex 1),
+ * bottom bar. Mobile uses 100dvh; desktop uses 100vh because chrome dimensions
+ * are stable on desktop.
+ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    min-height: 100vh;
+    height: 100vh;
+  }
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.errorWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.loadingWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}

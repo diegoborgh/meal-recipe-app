@@ -99,23 +99,35 @@
 /*
  * Cook Mode B theme override.
  * Scoped to the .cook-mode class on the route layout — do NOT apply globally.
- * Dark cream surface + honey accent, high-contrast for at-distance reading.
+ *
+ * Design ref: M_CookB / D_Cook in screens-mobile-2.jsx + screens-desktop.jsx.
+ * The base color is the original `--color-ink` repurposed as surface (#2A1F17),
+ * with white text overlays on top. The accent stays terracotta (the Next CTA),
+ * honey is reserved for HIGHLIGHTS (step number, active progress dot) — do not
+ * overload it as the action color.
+ *
+ * Surfaces are translucent white overlays so they read as cards on the warm-
+ * dark base. Components use --color-surface for the card bg by default; that
+ * just works under cook-mode without any conditional code.
  */
 .cook-mode {
-  --color-bg:           #1F1611;   /* near-black warm */
+  --color-bg:           #2A1F17;   /* warm dark — primary cook surface */
   --color-bg-deep:      #15100C;
-  --color-surface:      #2A1F17;   /* the original ink, repurposed as surface */
-  --color-surface-alt:  #3A2C22;
+  --color-surface:      rgba(255, 255, 255, 0.06);   /* translucent card */
+  --color-surface-alt:  rgba(255, 255, 255, 0.10);
 
-  --color-ink:          #F6F1E8;   /* cream as ink */
-  --color-ink-soft:     #D9CDB8;
-  --color-ink-muted:    #9C8C7C;
+  --color-ink:          #FFFFFF;
+  --color-ink-soft:     rgba(255, 255, 255, 0.7);
+  --color-ink-muted:    rgba(255, 255, 255, 0.5);
 
-  --color-accent:       #E8B25C;   /* honey is the action color in Cook Mode */
-  --color-accent-ink:   #1F1611;
+  /* Action color stays terracotta — Next button, brand. */
+  --color-accent:       #C0502B;
+  --color-accent-ink:   #FFFFFF;
+  /* Honey is the highlight color: step number, active progress dot. */
+  --color-honey:        #E8B25C;
 
-  --color-line:         #3A2C22;
-  --color-line-soft:    #2A1F17;
+  --color-line:         rgba(255, 255, 255, 0.15);
+  --color-line-soft:    rgba(255, 255, 255, 0.10);
 
   color-scheme: dark;
 }

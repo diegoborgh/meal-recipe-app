@@ -1,0 +1,71 @@
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(var(--safe-top) + 6px) 22px 14px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .bar { padding: 28px 56px; }
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@media (min-width: 1024px) {
+  .iconBtn { width: 48px; height: 48px; }
+}
+
+.ingredientsBtn {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ingredientsBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@media (min-width: 1024px) {
+  .ingredientsBtn { height: 48px; padding: 0 18px; }
+}
+
+/* Mobile: compact icon-only ingredients button. */
+.ingredientsBtnIcon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

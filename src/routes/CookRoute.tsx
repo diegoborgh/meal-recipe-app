@@ -1,14 +1,153 @@
-import { useParams } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ErrorState } from '@/components/states';
+import { usePreferences, type Units } from '@/context/PreferencesContext';
+import { useIsDesktop } from '@/hooks/useBreakpoint';
+import { CookBottomBar } from '@/features/cook/components/CookBottomBar';
+import { CookStep } from '@/features/cook/components/CookStep';
+import { CookTopBar } from '@/features/cook/components/CookTopBar';
+import { IngredientsPeek } from '@/features/cook/components/IngredientsPeek';
+import { useCookNavigation } from '@/features/cook/hooks/useCookNavigation';
+import { useWakeLock } from '@/features/cook/hooks/useWakeLock';
+import { useRecipe } from '@/features/recipe/hooks/useRecipe';
+import styles from './CookRoute.module.css';
 
-/** "/recipe/:id/cook" — Cook Mode B. Lands in slice 4. The protected anchor. */
+/**
+ * Cook Mode B — the protected anchor.
+ *
+ * One step at a time, very large type, terracotta Next button, wake-lock
+ * active. Exit returns to the recipe's Browse page (not the search results) —
+ * users naturally Cook Mode → Browse to peek at ingredients/notes.
+ *
+ * Recipe data: we fetch via useRecipe like the Browse page would. With the
+ * 24h edge cache, navigating Browse → Cook is essentially free.
+ */
 export function CookRoute() {
-  const { id } = useParams<{ id: string }>();
+  const { id: idParam } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
+  const { preferences } = usePreferences();
+
+  const id = idParam && /^\d+$/.test(idParam) ? Number(idParam) : null;
+  const { recipe, loading, error, quotaExceeded, refetch } = useRecipe(id);
+
+  // UI state. We deliberately don't share with Browse: a user might cook in
+  // metric without changing their default, and the servings adjuster lives
+  // on the Browse page (intentional split — Cook is for cooking, not editing).
+  const [units] = useState<Units>(preferences.units);
+  const [peekOpen, setPeekOpen] = useState(false);
+
+  const exit = useCallback(() => {
+    if (id != null) navigate(`/recipe/${id}`);
+    else navigate(-1);
+  }, [id, navigate]);
+
+  const nav = useCookNavigation(recipe?.steps.length ?? 0, {
+    onExit: () => {
+      if (peekOpen) setPeekOpen(false);
+      else exit();
+    },
+  });
+
+  // Wake lock only while we have a real cooking session — not during loading
+  // or error states.
+  useWakeLock(!!recipe && recipe.steps.length > 0);
+
+  // Bad id
+  if (id == null) {
+    return (
+      <div className={styles.shell}>
+        <div className={styles.errorWrap}>
+          <ErrorState
+            title="That recipe doesn’t exist."
+            body="The link may be old or mistyped."
+            onRetry={() => navigate('/')}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || (!recipe && !error)) {
+    return (
+      <div className={styles.shell}>
+        <div className={styles.loadingWrap}>Setting the table…</div>
+      </div>
+    );
+  }
+
+  if (error || !recipe) {
+    return (
+      <div className={styles.shell}>
+        <div className={styles.errorWrap}>
+          <ErrorState
+            {...(quotaExceeded
+              ? {
+                  title: 'Caught our breath.',
+                  body: 'We’ve hit today’s recipe quota. Try again later.',
+                }
+              : {})}
+            onRetry={refetch}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const steps = recipe.steps;
+  if (steps.length === 0) {
+    // Recipe came back without instructions — common for some Spoonacular
+    // entries. Send the user back to Browse where they'll see the source link.
+    return (
+      <div className={styles.shell}>
+        <div className={styles.errorWrap}>
+          <ErrorState
+            title="No step-by-step here."
+            body="This recipe doesn’t have structured steps. The source link on the recipe page should have the full method."
+            onRetry={() => navigate(`/recipe/${id}`)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const currentStepText = steps[nav.index] ?? '';
+
   return (
-    <section style={{ padding: 32 }}>
-      <h1 className="t-display-xl">Cook Mode</h1>
-      <p style={{ color: 'var(--color-ink-soft)', fontSize: 16 }}>
-        Recipe {id} · slice 4 placeholder.
-      </p>
-    </section>
+    <div className={styles.shell}>
+      <CookTopBar
+        count={nav.count}
+        index={nav.index}
+        onExit={exit}
+        onToggleIngredients={() => setPeekOpen((v) => !v)}
+        onJump={nav.goTo}
+        isDesktop={isDesktop}
+      />
+
+      <div className={styles.body}>
+        <CookStep
+          index={nav.index}
+          count={nav.count}
+          text={currentStepText}
+          recipeTitle={recipe.title}
+        />
+      </div>
+
+      <CookBottomBar
+        isFirst={nav.isFirst}
+        isLast={nav.isLast}
+        onPrev={nav.prev}
+        onNext={nav.next}
+        onDone={exit}
+      />
+
+      <IngredientsPeek
+        open={peekOpen}
+        recipe={recipe}
+        servings={recipe.servings}
+        units={units}
+        onClose={() => setPeekOpen(false)}
+      />
+    </div>
   );
 }
