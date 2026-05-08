@@ -65,6 +65,26 @@ Entries should be brief. Format:
 **Why:** RecipeCard needs `readyInMinutes` + calories + the boolean flags for diet badges. Without `addRecipeInformation` we'd need a second per-recipe call. `instructionsRequired` filters out recipes we couldn't show in Cook Mode anyway.
 **Reversible?** Yes — three flags in `src/api/search.ts`.
 
+## 2026-05-07 — Favorites: optimistic save with background full-recipe upgrade
+**Decision:** Tapping the heart inserts a Dexie row using only the `RecipeSummary` data we already have on screen, marked `complete: false`. A fire-and-forget `getRecipe(id)` then upgrades the row with full ingredients/steps/nutrition and flips `complete: true`. `useRecipe` checks the Dexie cache before the API and uses the cached row only when `complete: true`.
+**Why:** Heart taps should feel instant — waiting for a network round-trip on every save is jarring. Most users will favorite from search results, where summary fields are enough for the favorites list anyway. Detail-view offline support comes online a moment later when the upgrade lands.
+**Reversible?** Yes — drop the optimistic step and always fetch full data before insert. Costs a noticeable lag on save.
+
+## 2026-05-07 — Added `dexie-react-hooks`
+**Decision:** Added `dexie-react-hooks` (~3KB) for `useLiveQuery`. The FavoritesProvider and `useFavoritesList` use it to subscribe to Dexie writes and re-render automatically.
+**Why:** Hand-rolling Dexie subscription via `Dexie.observable` is doable but error-prone — `useLiveQuery` is the official companion package, used everywhere with Dexie. Cross-tab updates work for free.
+**Reversible?** Yes — replace each `useLiveQuery` with manual `useState` + observable subscription.
+
+## 2026-05-07 — Dexie schema v1 declares all three tables now
+**Decision:** v1 of the schema declares `favorites` (slice 5), `preferences` (slice 6), `fridge` (slice 7) up front, even though only `favorites` is wired. Versioning rule: never edit a past version — to change shape later, append a new `db.version(N).stores(...).upgrade(...)` block.
+**Why:** Adding empty tables is free, but bumping schema version once shipped forces every existing user to run the upgrade hook. Declaring them all in v1 means slices 6 and 7 don't need a migration.
+**Reversible?** With effort — would force a v2 to drop unused tables, more work than it's worth.
+
+## 2026-05-07 — Favorites view-toggle + category chips deferred
+**Decision:** The grid/list view toggle and dynamic category chips ("All · 23 / Quick · 8 / Vegetarian · 12") shown in the design are deferred to slice 9 / post-MVP. The route ships with grid view + search-within only.
+**Why:** Both are surface-area expansions, not core to the "save and find again" job. Search-within handles ~all real lookup needs at this scale (dozens of saved recipes). The chip counts in particular need a derivation rule that works across mixed-badge recipes — non-trivial.
+**Reversible?** Yes — additive changes.
+
 ## 2026-05-06 — Cook Mode theme: terracotta accent, honey highlight (corrected)
 **Decision:** The `.cook-mode` token override was initially set to use honey as `--color-accent` (the action color). Updated to keep `--color-accent` as terracotta — matching the design's Next button — and treat honey as a highlight color (step number, active progress dot). Surfaces are translucent white overlays (`rgba(255, 255, 255, 0.06)`) on a warm-dark `#2A1F17` base.
 **Why:** The first pass misread the design. With honey as accent, components rendered under cook-mode would have changed all primary affordances to yellow instead of staying terracotta — wrong visual hierarchy. The corrected scope means our shared Button/Chip/etc. work correctly under cook-mode without any conditional code.

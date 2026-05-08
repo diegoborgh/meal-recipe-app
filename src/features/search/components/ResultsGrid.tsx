@@ -54,7 +54,7 @@ export function ResultsGrid({ results, hasMore, loadingMore, onLoadMore }: Resul
             badges={r.badges}
             saved={isSaved(r.id)}
             onClick={() => navigate(`/recipe/${r.id}`)}
-            onToggleSave={() => void toggle(r.id)}
+            onToggleSave={() => void toggle(r)}
           />
         ))}
       </div>

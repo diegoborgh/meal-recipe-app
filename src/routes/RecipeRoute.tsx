@@ -82,7 +82,9 @@ export function RecipeRoute() {
   }
 
   const goCook = () => navigate(`/recipe/${id}/cook`);
-  const onToggleSave = () => void toggle(id);
+  // Recipe extends RecipeSummary so we can pass it directly — toggle only
+  // reads the summary fields when saving.
+  const onToggleSave = () => void toggle(recipe);
   const saved = isSaved(id);
 
   // Attribution line: "Adapted from <Source>" with link to source when available.

@@ -1,0 +1,23 @@
+/*
+ * Favorites grid. Same column rules as ResultsGrid for consistency, but
+ * defined locally — feature-scoped components shouldn't depend on each other's
+ * CSS modules.
+ */
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+}
+
+@media (min-width: 1400px) {
+  .grid { grid-template-columns: repeat(4, 1fr); }
+}

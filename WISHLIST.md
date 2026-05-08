@@ -5,6 +5,12 @@ note where it would land + a one-liner on why it's deferred.
 
 ## UI / UX
 
+- **Favorites grid/list view toggle** — design shows both in the header. Grid
+  view is enough for v1; list adds re-skinned card and toggle persistence.
+  Slice 9.
+- **Favorites category chips** — "All · 23 / Quick · 8 / Vegetarian · 12".
+  Counts are derived from the saved set (groupBy badge or readyInMinutes).
+  Search-within covers most use cases for now. Slice 9 / post-MVP.
 - **Collapsible desktop filter sidebar** — design has it fixed at 280px; would
   give back ~280px on smaller laptops. Slice 9.
 - **Cook Mode optional timer card** — design shows a "Set a timer · 12 min" tip
