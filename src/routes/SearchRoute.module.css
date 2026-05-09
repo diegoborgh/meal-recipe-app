@@ -127,3 +127,27 @@
   color: var(--color-ink);
   font-weight: 600;
 }
+
+/*
+ * Floating Filters CTA on mobile.
+ *
+ * Default: bottom-right, sits above the mobile nav. Acts as the open
+ * affordance. zIndex is below the sheet (3 < 50) so the sheet's scrim
+ * obscures it cleanly when open.
+ *
+ * Open state: lifted above the sheet (z-index > 51) and parked at the
+ * top-right so it's visible above the sheet content. Same button, toggling
+ * role, no second close affordance to learn.
+ */
+.filtersCta {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--mobile-nav-h) + var(--safe-bottom) + 12px);
+  z-index: 3;
+}
+
+.filtersCtaOpen {
+  top: calc(var(--safe-top) + 12px);
+  bottom: auto;
+  z-index: 60;
+}

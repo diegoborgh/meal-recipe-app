@@ -153,7 +153,7 @@ export function SearchRoute() {
           dispatch={dispatch}
           lockedDiet={lockedDiet}
           lockedIntolerances={lockedIntolerances}
-          onOpenFilters={() => (isDesktop ? null : setSheetOpen(true))}
+          onOpenFilters={() => (isDesktop ? null : setSheetOpen((v) => !v))}
         />
       </div>
 
@@ -249,26 +249,24 @@ export function SearchRoute() {
             }}
             onClose={() => setSheetOpen(false)}
           />
-          {/* Floating Filters CTA on mobile — keeps the chip in the header
-              from being the only entry point. */}
-          {!sheetOpen && (
-            <div
-              style={{
-                position: 'fixed',
-                right: 16,
-                bottom: `calc(var(--mobile-nav-h) + var(--safe-bottom) + 12px)`,
-                zIndex: 3,
-              }}
+          {/*
+           * Floating Filters CTA on mobile. Always visible — toggles the
+           * sheet open/closed. When open, the same button acts as the close
+           * affordance (lifted above the sheet via .filtersCtaOpen).
+           */}
+          <div
+            className={`${styles.filtersCta} ${
+              sheetOpen ? styles.filtersCtaOpen : ''
+            }`}
+          >
+            <Button
+              variant="dark"
+              leadIcon={sheetOpen ? 'close' : 'filter'}
+              onClick={() => setSheetOpen((v) => !v)}
             >
-              <Button
-                variant="dark"
-                leadIcon="filter"
-                onClick={() => setSheetOpen(true)}
-              >
-                Filters
-              </Button>
-            </div>
-          )}
+              {sheetOpen ? 'Close' : 'Filters'}
+            </Button>
+          </div>
         </>
       )}
     </div>
