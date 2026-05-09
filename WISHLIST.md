@@ -37,6 +37,13 @@ note where it would land + a one-liner on why it's deferred.
 - **Surface "saved" feedback on prefs auto-save** — currently writes are
   silent. A subtle "Saved" pulse on the affected control would close the
   loop. Slice 9.
+- **Fridge cards: time + calories on hover/long-press** — Spoonacular's
+  `findByIngredients` doesn't return readyInMinutes / calories, so the
+  fridge row currently shows "Need: …" instead. Option: lazy-fetch
+  `recipes/{id}/information` on hover (desktop) or long-press (mobile),
+  cache via sessionCache, populate the row inline. ~1 extra API point per
+  peek vs ~20 per search if we fetched all upfront. Worth evaluating —
+  may not be necessary if the rows feel useful as-is.
 
 ## Engineering
 
