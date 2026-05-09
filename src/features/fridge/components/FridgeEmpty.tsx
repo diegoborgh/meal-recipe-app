@@ -16,42 +16,60 @@ const STARTERS = [
   'Lemon',
 ];
 
+export interface FridgeEmptyProps {
+  /** When true, shows the "How this works" callout. Used on first-visit only. */
+  showHowItWorks?: boolean;
+}
+
 /**
- * Shown when the fridge is empty — gives the user a one-tap path to populate
- * a few starters + a small "How this works" explainer.
+ * Pre-search guidance for the Fridge route. Two pieces:
+ *   1. Starter chips — filtered to those NOT already in the fridge, so the
+ *      row shrinks as the user adds rather than disappearing wholesale on the
+ *      first tap.
+ *   2. "How this works" callout — onboarding for the first-visit empty state
+ *      only; toggled off once the user has any items.
+ *
+ * Renders nothing when there's nothing left to suggest AND onboarding is off.
  */
-export function FridgeEmpty() {
-  const { add } = useFridge();
+export function FridgeEmpty({ showHowItWorks = true }: FridgeEmptyProps) {
+  const { add, has } = useFridge();
+  const remaining = STARTERS.filter((s) => !has(s));
+
+  if (remaining.length === 0 && !showHowItWorks) return null;
 
   return (
     <div className={styles.frame}>
-      <div className={styles.section}>
-        <div className={styles.label}>Common starters · tap to add</div>
-        <div className={styles.starters}>
-          {STARTERS.map((s) => (
-            <Chip
-              key={s}
-              leadIcon="plus"
-              onClick={() => void add(s)}
-            >
-              {s}
-            </Chip>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.howCard}>
-        <div className={styles.howIcon}>
-          <Icon name="info" size={18} />
-        </div>
-        <div>
-          <div className={styles.howTitle}>How this works</div>
-          <div className={styles.howBody}>
-            Add 4–6 ingredients you have. Recipes are ranked by how few extras
-            you'd need to buy.
+      {remaining.length > 0 && (
+        <div className={styles.section}>
+          <div className={styles.label}>Common starters · tap to add</div>
+          <div className={styles.starters}>
+            {remaining.map((s) => (
+              <Chip
+                key={s}
+                leadIcon="plus"
+                onClick={() => void add(s)}
+              >
+                {s}
+              </Chip>
+            ))}
           </div>
         </div>
-      </div>
+      )}
+
+      {showHowItWorks && (
+        <div className={styles.howCard}>
+          <div className={styles.howIcon}>
+            <Icon name="info" size={18} />
+          </div>
+          <div>
+            <div className={styles.howTitle}>How this works</div>
+            <div className={styles.howBody}>
+              Add 4–6 ingredients you have. Recipes are ranked by how few extras
+              you'd need to buy.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

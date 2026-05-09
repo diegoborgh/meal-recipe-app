@@ -90,17 +90,17 @@ export function FridgeRoute() {
         )}
       </header>
 
-      {isEmpty && <FridgeEmpty />}
+      {/*
+       * Pre-search: keep starter chips visible while the user is building
+       * their list. Each tap removes the starter from the row (filtered by
+       * what's in the fridge) so the user can keep tapping multiple in a
+       * row. "How this works" is onboarding-only — first visit, fridge
+       * truly empty.
+       */}
+      {hasNeverSearched && <FridgeEmpty showHowItWorks={isEmpty} />}
 
       {!isEmpty && (
         <>
-          {hasNeverSearched && !loading && (
-            <div className={styles.idleHint}>
-              Add the ingredients you have, then tap{' '}
-              <strong>Find recipes</strong>.
-            </div>
-          )}
-
           {!hasNeverSearched && (
             <>
               <div className={styles.resultsHead}>
