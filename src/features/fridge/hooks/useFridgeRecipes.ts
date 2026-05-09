@@ -1,13 +1,15 @@
 /**
- * useFridgeRecipes — fetch recipes that match the user's current fridge
- * contents. Mirrors useRecipeSearch's error/cache model.
+ * useFridgeRecipes — fetch recipes that match a committed ingredient list.
  *
- * Cache key is the sorted list of ingredient names — adding "eggs" then
- * "spinach" gives the same key as adding "spinach" then "eggs", so the user
- * doesn't pay twice for an order-shuffled fridge.
+ * Triggering: the hook fires whenever the input array changes. The Fridge
+ * route holds a *committed* ingredient list separate from the live fridge
+ * (driven by an explicit "Find recipes" button), so this hook only sees a
+ * change when the user intentionally asks. No internal debounce — the
+ * commit flow handles intent.
  *
- * Debounce: 350ms after a fridge mutation. Lets a user add/remove a few
- * ingredients in a row without firing one API call per chip click.
+ * Cache key is the sorted list of ingredient names — committing
+ * ["eggs","spinach"] is identical to ["spinach","eggs"], so re-orderings
+ * don't pay twice.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -81,13 +83,12 @@ export function useFridgeRecipes(ingredients: string[]): UseFridgeRecipesState {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedKey]);
 
-  // Debounced fire on fridge change.
+  // Fire when the committed ingredient set changes. No debounce — the route
+  // gates this via an explicit "Find recipes" button, so every change here
+  // is intentional.
   useEffect(() => {
-    const id = window.setTimeout(run, 350);
-    return () => {
-      window.clearTimeout(id);
-      abortRef.current?.abort();
-    };
+    run();
+    return () => abortRef.current?.abort();
   }, [run]);
 
   const refetch = useCallback(() => {
