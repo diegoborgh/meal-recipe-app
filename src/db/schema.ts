@@ -70,5 +70,14 @@ export class SkilletDB extends Dexie {
       // for lookups when we need to round-trip to the API.
       fridge: '&name, spoonacularId',
     });
+
+    // v2: add `addedAt` index on fridge so we can `orderBy('addedAt')` for
+    // the "newest first" ordering used in FridgeContext + db/fridge helpers.
+    // Existing v1 data is preserved — Dexie auto-builds the index on upgrade.
+    this.version(2).stores({
+      favorites: '&id, savedAt',
+      preferences: '&id',
+      fridge: '&name, spoonacularId, addedAt',
+    });
   }
 }
