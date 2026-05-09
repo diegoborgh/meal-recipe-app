@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useRef, type Dispatch } from 'react';
 import { Button } from '@/components/Button';
 import { filtersReducer, type FilterAction } from '../filters';
-import type { Filters } from '../types';
+import type { Diet, Filters, Intolerance } from '../types';
 import { FiltersPanel } from './FiltersPanel';
 import styles from './FiltersSheet.module.css';
 
@@ -9,6 +9,10 @@ export interface FiltersSheetProps {
   open: boolean;
   /** The committed (URL-backed) filters. The sheet operates on a draft copy. */
   filters: Filters;
+  /** Diet pref default; passed through to FiltersPanel. */
+  lockedDiet?: Diet | null;
+  /** Intolerance prefs that can't be toggled off; passed through to FiltersPanel. */
+  lockedIntolerances?: readonly Intolerance[];
   totalResults: number;
   onApply: (next: Filters) => void;
   onClose: () => void;
@@ -22,6 +26,8 @@ export interface FiltersSheetProps {
 export function FiltersSheet({
   open,
   filters,
+  lockedDiet,
+  lockedIntolerances,
   totalResults,
   onApply,
   onClose,
@@ -80,7 +86,12 @@ export function FiltersSheet({
           </button>
         </div>
         <div className={styles.body}>
-          <FiltersPanel filters={draft} dispatch={dispatch as Dispatch<FilterAction>} />
+          <FiltersPanel
+            filters={draft}
+            dispatch={dispatch as Dispatch<FilterAction>}
+            {...(lockedDiet !== undefined ? { lockedDiet } : {})}
+            {...(lockedIntolerances !== undefined ? { lockedIntolerances } : {})}
+          />
         </div>
         <div className={styles.foot}>
           <Button variant="outline" full onClick={onClose}>

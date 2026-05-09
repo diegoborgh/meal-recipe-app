@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/states';
+import { usePreferences } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { HeroSearch } from '@/features/search/components/HeroSearch';
 import { ActiveFilterChips } from '@/features/search/components/ActiveFilterChips';
@@ -18,7 +19,13 @@ import {
   filtersToSearchParams,
   filtersReducer,
 } from '@/features/search/filters';
-import { type Filters } from '@/features/search/types';
+import {
+  DIETS,
+  INTOLERANCES,
+  type Diet,
+  type Filters,
+  type Intolerance,
+} from '@/features/search/types';
 import { useRecipeSearch } from '@/features/search/hooks/useRecipeSearch';
 import type { SearchParams } from '@/api/search';
 import styles from './SearchRoute.module.css';
@@ -41,6 +48,7 @@ export function SearchRoute() {
   const isDesktop = useIsDesktop();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const { preferences } = usePreferences();
 
   const filters: Filters = useMemo(
     () => filtersFromSearchParams(searchParams),
@@ -59,29 +67,63 @@ export function SearchRoute() {
     [filters, setFilters],
   );
 
+  /*
+   * Locked decision: intolerances from preferences are *always* applied —
+   * never overridden by the filter UI. Diet from preferences is a default
+   * — used when the per-search filters.diet is null. Both unions/fallbacks
+   * happen here at the API boundary so the URL stays minimal (we don't
+   * want to URL-encode preference state).
+   *
+   * Narrow the prefs values to our type unions before merging — preferences
+   * are stored as plain string but only DIETS / INTOLERANCES values are valid.
+   */
+  const lockedDiet: Diet | null = useMemo(() => {
+    const v = preferences.diet;
+    return v && (DIETS as readonly string[]).includes(v) ? (v as Diet) : null;
+  }, [preferences.diet]);
+
+  const lockedIntolerances: Intolerance[] = useMemo(
+    () =>
+      preferences.intolerances.filter((i): i is Intolerance =>
+        (INTOLERANCES as readonly string[]).includes(i),
+      ),
+    [preferences.intolerances],
+  );
+
   // Translate Filters → SearchParams (the API client's shape).
   const searchInputs: SearchParams = useMemo(() => {
     const out: SearchParams = { sort: filters.sort };
     if (filters.query.trim()) out.query = filters.query.trim();
-    if (filters.diet) out.diet = filters.diet;
-    if (filters.intolerances.length > 0) out.intolerances = filters.intolerances;
+
+    // Diet: per-search wins, prefs as fallback default.
+    const effectiveDiet = filters.diet ?? lockedDiet;
+    if (effectiveDiet) out.diet = effectiveDiet;
+
+    // Intolerances: union of locked-from-prefs + per-search additions.
+    const intolerances = Array.from(
+      new Set<string>([...lockedIntolerances, ...filters.intolerances]),
+    );
+    if (intolerances.length > 0) out.intolerances = intolerances;
+
     if (filters.type) out.type = filters.type;
     if (filters.maxReadyTime != null) out.maxReadyTime = filters.maxReadyTime;
     if (filters.minCalories != null) out.minCalories = filters.minCalories;
     if (filters.maxCalories != null) out.maxCalories = filters.maxCalories;
     return out;
-  }, [filters]);
+  }, [filters, lockedDiet, lockedIntolerances]);
 
   // Don't fire a search when there's literally nothing to search by.
+  // Locked-from-prefs values count — a user with intolerances set has an
+  // implicit search input even without typing anything.
   const hasAnyInput = useMemo(() => {
     if (filters.query.trim()) return true;
-    if (filters.diet) return true;
-    if (filters.intolerances.length > 0) return true;
+    if (filters.diet || lockedDiet) return true;
+    if (filters.intolerances.length > 0 || lockedIntolerances.length > 0) return true;
     if (filters.type) return true;
     if (filters.maxReadyTime != null) return true;
     if (filters.minCalories != null || filters.maxCalories != null) return true;
     return false;
-  }, [filters]);
+  }, [filters, lockedDiet, lockedIntolerances]);
 
   const search = useRecipeSearch(searchInputs, hasAnyInput);
 
@@ -109,6 +151,8 @@ export function SearchRoute() {
         <ActiveFilterChips
           filters={filters}
           dispatch={dispatch}
+          lockedDiet={lockedDiet}
+          lockedIntolerances={lockedIntolerances}
           onOpenFilters={() => (isDesktop ? null : setSheetOpen(true))}
         />
       </div>
@@ -128,7 +172,12 @@ export function SearchRoute() {
                 Reset
               </button>
             </div>
-            <FiltersPanel filters={filters} dispatch={dispatch} />
+            <FiltersPanel
+              filters={filters}
+              dispatch={dispatch}
+              lockedDiet={lockedDiet}
+              lockedIntolerances={lockedIntolerances}
+            />
           </aside>
         )}
 
@@ -191,6 +240,8 @@ export function SearchRoute() {
           <FiltersSheet
             open={sheetOpen}
             filters={filters}
+            lockedDiet={lockedDiet}
+            lockedIntolerances={lockedIntolerances}
             totalResults={search.totalResults}
             onApply={(next) => {
               setFilters(next);

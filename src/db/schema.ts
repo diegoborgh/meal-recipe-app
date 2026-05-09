@@ -34,8 +34,11 @@ export interface FavoriteRow extends Recipe {
 export interface PreferencesRow {
   /** Always 'singleton' — there's only ever one row in this table. */
   id: 'singleton';
-  diets: string[];
+  /** Single diet (Spoonacular API only accepts one). null = no preference. */
+  diet: string | null;
+  /** Intolerances to ALWAYS apply on search — never overridden in filters. */
   intolerances: string[];
+  /** Optional kcal target; doesn't auto-filter, just a tracker for v2 features. */
   calorieTarget: number | null;
   units: 'us' | 'metric';
   updatedAt: number;

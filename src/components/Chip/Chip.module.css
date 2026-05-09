@@ -25,7 +25,7 @@
   padding-right: 6px;
 }
 
-.chip:hover {
+.chip:not(:disabled):hover {
   border-color: var(--color-ink-muted);
 }
 
@@ -33,6 +33,16 @@
   background: var(--color-accent);
   color: var(--color-accent-ink);
   border-color: var(--color-accent);
+}
+
+/* Locked-from-prefs chips: active-styled but un-toggleable. */
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.chip.active:disabled {
+  filter: grayscale(0.15);
 }
 
 .removeButton {

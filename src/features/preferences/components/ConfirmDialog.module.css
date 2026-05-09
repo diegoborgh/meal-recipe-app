@@ -1,0 +1,58 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(40, 30, 20, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: scrimIn var(--dur-base) var(--ease-out);
+}
+
+.dialog {
+  background: var(--color-surface);
+  border-radius: var(--radius-16);
+  padding: 22px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: dialogIn var(--dur-base) var(--ease-out);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--color-ink);
+}
+
+.body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@keyframes scrimIn {
+  from { background: rgba(40, 30, 20, 0); }
+  to   { background: rgba(40, 30, 20, 0.45); }
+}
+
+@keyframes dialogIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .dialog { animation: none; }
+}

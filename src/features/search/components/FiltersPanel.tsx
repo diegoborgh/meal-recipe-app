@@ -5,7 +5,9 @@ import {
   INTOLERANCES,
   MEAL_TYPES,
   TIME_PRESETS,
+  type Diet,
   type Filters,
+  type Intolerance,
 } from '../types';
 import type { FilterAction } from '../filters';
 import { FilterGroup, FilterLabel } from './FilterGroup';
@@ -15,18 +17,39 @@ import styles from './FiltersPanel.module.css';
 export interface FiltersPanelProps {
   filters: Filters;
   dispatch: Dispatch<FilterAction>;
+  /** Diet from preferences. Used as default when filters.diet is null. */
+  lockedDiet?: Diet | null;
+  /** Intolerances from preferences — always applied; chips are un-toggleable. */
+  lockedIntolerances?: readonly Intolerance[];
 }
 
 /**
  * Filter controls. The shared body of both the mobile bottom sheet and the
  * desktop sidebar — same controls, same state, two chrome variants.
+ *
+ * Preferences-locked values:
+ *   - `lockedDiet`: shown active when filters.diet is null. The user can pick
+ *     a different diet (which overrides for this search) but clicking "Any"
+ *     reverts to the locked default rather than disabling diet entirely.
+ *   - `lockedIntolerances`: always shown active and disabled — the user can
+ *     ADD more intolerances ad-hoc but cannot un-set the locked ones from a
+ *     filter. Locked decision: hard filter, never overridden.
  */
-export function FiltersPanel({ filters, dispatch }: FiltersPanelProps) {
+export function FiltersPanel({
+  filters,
+  dispatch,
+  lockedDiet,
+  lockedIntolerances = [],
+}: FiltersPanelProps) {
+  // Effective diet shown active in the chip row — per-search overrides the
+  // pref. When neither set, "Any" is active.
+  const effectiveDiet = filters.diet ?? lockedDiet ?? null;
+
   return (
     <div className={styles.panel}>
-      <FilterGroup label="Diet">
+      <FilterGroup label={lockedDiet ? 'Diet (default from preferences)' : 'Diet'}>
         <Chip
-          active={filters.diet === null}
+          active={effectiveDiet === null}
           onClick={() => dispatch({ type: 'set_diet', diet: null })}
         >
           Any
@@ -34,9 +57,14 @@ export function FiltersPanel({ filters, dispatch }: FiltersPanelProps) {
         {DIETS.map((d) => (
           <Chip
             key={d}
-            active={filters.diet === d}
+            active={effectiveDiet === d}
             onClick={() =>
-              dispatch({ type: 'set_diet', diet: filters.diet === d ? null : d })
+              dispatch({
+                type: 'set_diet',
+                // Toggle to null only if user is actively turning off a per-search override;
+                // otherwise picking the same value as the locked default leaves it set.
+                diet: filters.diet === d ? null : d,
+              })
             }
           >
             {d}
@@ -44,16 +72,31 @@ export function FiltersPanel({ filters, dispatch }: FiltersPanelProps) {
         ))}
       </FilterGroup>
 
-      <FilterGroup label="Avoid (intolerances)">
-        {INTOLERANCES.map((i) => (
-          <Chip
-            key={i}
-            active={filters.intolerances.includes(i)}
-            onClick={() => dispatch({ type: 'toggle_intolerance', intolerance: i })}
-          >
-            {i}
-          </Chip>
-        ))}
+      <FilterGroup
+        label={
+          lockedIntolerances.length > 0
+            ? 'Avoid (locked from preferences) + extras'
+            : 'Avoid (intolerances)'
+        }
+      >
+        {INTOLERANCES.map((i) => {
+          const fromPrefs = lockedIntolerances.includes(i);
+          const fromFilter = filters.intolerances.includes(i);
+          return (
+            <Chip
+              key={i}
+              active={fromPrefs || fromFilter}
+              disabled={fromPrefs}
+              title={fromPrefs ? 'Locked from your preferences' : undefined}
+              onClick={() => {
+                if (fromPrefs) return; // un-toggleable
+                dispatch({ type: 'toggle_intolerance', intolerance: i });
+              }}
+            >
+              {i}
+            </Chip>
+          );
+        })}
       </FilterGroup>
 
       <FilterGroup label="Max ready time">

@@ -3,6 +3,12 @@
 Things to revisit during slice 9 (polish pass) or post-MVP. Each entry should
 note where it would land + a one-liner on why it's deferred.
 
+## Locked-decision adjacent (v2)
+
+- **Theme picker (Light / Dark / System)** — design has the chooser on the
+  Preferences screen. v1 is light-only per CLAUDE.md; the picker lives in
+  v2 alongside the dark theme work.
+
 ## UI / UX
 
 - **Favorites grid/list view toggle** — design shows both in the header. Grid
@@ -24,6 +30,13 @@ note where it would land + a one-liner on why it's deferred.
   chevron. Filters type already carries `sort`; just needs UI. Slice 9 / post.
 - **Bottom-sheet swipe-to-dismiss** — currently sheets close via scrim tap or
   Esc only. iOS users will reach for the swipe. Slice 9.
+- **Calorie goal — apply automatically** — v1 stores the goal but doesn't
+  use it in search. Future: surface a "fits your day" badge on cards, or
+  set a default `maxCalories` filter to (target / 3) for dinner queries.
+  Post-MVP — needs a meal-of-day signal we don't have yet.
+- **Surface "saved" feedback on prefs auto-save** — currently writes are
+  silent. A subtle "Saved" pulse on the affected control would close the
+  loop. Slice 9.
 
 ## Engineering
 

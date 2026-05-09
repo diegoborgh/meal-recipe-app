@@ -13,6 +13,34 @@ Entries should be brief. Format:
 
 ---
 
+## 2026-05-08 — Preferences merge into search at the API boundary
+**Decision:** SearchRoute computes `searchInputs` for `useRecipeSearch` by:
+- Diet: `filters.diet ?? preferences.diet` (per-search overrides the pref default).
+- Intolerances: `union(preferences.intolerances, filters.intolerances)` (always merged).
+The URL stays minimal — preferences don't get written into the query string.
+**Why:** Keeps the URL human-readable + shareable for the per-search overrides while still honoring the locked decision that intolerances are a hard filter. URL-encoding prefs would also create ambiguity if the user changed a pref later: do old saved URLs still apply old prefs?
+**Reversible?** Yes — `searchInputs` builder is the only consumer.
+
+## 2026-05-08 — Locked-from-prefs chips render disabled, not hidden
+**Decision:** In FiltersPanel and ActiveFilterChips, intolerances coming from preferences render as `active` but `disabled`, with a tooltip. The user sees them in both surfaces, can't toggle them off, and an explicit hint connects them back to Preferences.
+**Why:** Hidden = surprise filter behavior ("why are vegan recipes missing?"). Visible-but-locked makes the data flow honest and gives a path: change Preferences if you don't want the filter.
+**Reversible?** Yes.
+
+## 2026-05-08 — Preferences auto-save, no debounce on most controls
+**Decision:** Each control fires `savePreferences` immediately on change. Only the calorie-target slider debounces (200ms) — sliders fire dozens of writes per drag. Diet/intolerance/units chip taps and toggles write directly.
+**Why:** "Auto-saves; no Save button" is the build-prompt requirement. Debounce-everything is over-engineering when most controls are discrete clicks. The slider is the only "drag" affordance; a 200ms tail is invisible to users and saves Dexie a dozen writes per interaction.
+**Reversible?** Yes — wrap every mutator in the same debounce if needed.
+
+## 2026-05-08 — Preferences `diet` stored as single value (schema edit, no v2)
+**Decision:** Edited the `PreferencesRow` shape to use `diet: string | null` instead of `diets: string[]` while still on v1 of the schema. No migration written — relying on the fact that no real users have `preferences` rows yet (the slice that wrote that table only just shipped today).
+**Why:** Spoonacular's complexSearch only accepts a single `diet` value; storing an array invites the question "which one wins?" every time we read it. Single value matches the API and the search filter UI.
+**Reversible?** Yes — append a v2 migration if the field needs to grow back into an array.
+
+## 2026-05-08 — Theme picker deferred to v2 (with dark mode)
+**Decision:** The Light / Dark / System picker shown in the Preferences design is not built. v1 is light-only per CLAUDE.md.
+**Why:** Building the picker without a real dark theme would either ship a fake control (bad UX) or implicitly commit us to dark theme work in v1 (scope creep).
+**Reversible?** N/A — the toggle lands with the dark theme in v2.
+
 ## 2026-05-05 — Project structure (slice 1)
 **Decision:** Adopted the structure proposed in the slice-1 sign-off, with these deltas vs build-prompt.md's suggestion:
 - `src/features/<feature>/` holds screen-local components (FilterGroup, IngredientRow, MacroPill); shared `src/components/` stays 1:1 with `components.jsx`.
