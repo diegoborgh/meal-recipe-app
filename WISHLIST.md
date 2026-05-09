@@ -40,5 +40,9 @@ note where it would land + a one-liner on why it's deferred.
 
 ## Engineering
 
+- **Top-level error boundary** — a single Dexie/render error currently blanks
+  the whole tree (e.g., the slice-7 `orderBy` on a non-indexed field crashed
+  the app via useLiveQuery rethrow). Adding a boundary with a "Reload" CTA
+  would degrade gracefully and is the right slice-9 polish.
 - **Vitest + a smoke test** for the API client and Dexie helpers. Add when the
-  first IndexedDB bug shows up.
+  first IndexedDB bug shows up. (Update: it did, slice 7.)
