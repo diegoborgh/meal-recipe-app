@@ -3,7 +3,7 @@
  *
  * Behavior:
  *   - When `params` change (deep-compared via the serialized filter URL),
- *     the previous request is aborted and we reset to page 0.
+ *     the previous request is aborted and we reset.
  *   - `loadMore()` appends the next page; safe to call repeatedly — overlapping
  *     calls are ignored.
  *   - Quota errors (402/429) are surfaced as a separate `quotaExceeded` flag
@@ -11,14 +11,25 @@
  *   - Loads are debounced 250ms internally so typing-as-you-search doesn't
  *     fire a request per keystroke. (The query input also uses useDebouncedValue
  *     before passing in, but this is defense-in-depth.)
+ *
+ * Session caching:
+ *   Successful results (the full SearchState — accumulated pages, totals,
+ *   hasMore) are written to src/lib/sessionCache. When the same params come
+ *   back into scope (e.g. user clicks Cook → Home), we hydrate from cache
+ *   and skip the fetch entirely. Cache lives until tab close.
+ *
+ *   `refetch()` explicitly evicts and re-fetches — used by error states'
+ *   "Try again" button.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchRecipes, type SearchParams } from '@/api/search';
 import { ApiError, QuotaError } from '@/api/client';
+import { cacheKey, evict, getCached, setCached } from '@/lib/sessionCache';
 import type { RecipeSummary } from '@/types/recipe';
 
 const PAGE_SIZE = 12;
+const CACHE_NS = 'search';
 
 export interface SearchState {
   results: RecipeSummary[];
@@ -39,6 +50,9 @@ const INITIAL: SearchState = {
   quotaExceeded: false,
   hasMore: false,
 };
+
+/** Subset of SearchState that's worth persisting across mounts. */
+type CachedState = Pick<SearchState, 'results' | 'totalResults' | 'hasMore'>;
 
 export function useRecipeSearch(
   params: SearchParams,
@@ -72,14 +86,25 @@ export function useRecipeSearch(
         );
         // Bail if a newer request superseded us between await-points.
         if (ac.signal.aborted) return;
-        setState((s) => ({
-          ...s,
-          results: append ? [...s.results, ...page.results] : page.results,
-          totalResults: page.totalResults,
-          hasMore: offset + page.results.length < page.totalResults,
-          loading: false,
-          loadingMore: false,
-        }));
+        setState((s) => {
+          const next: SearchState = {
+            ...s,
+            results: append ? [...s.results, ...page.results] : page.results,
+            totalResults: page.totalResults,
+            hasMore: offset + page.results.length < page.totalResults,
+            loading: false,
+            loadingMore: false,
+          };
+          // Persist the success path so a later remount with the same params
+          // skips the fetch.
+          const persisted: CachedState = {
+            results: next.results,
+            totalResults: next.totalResults,
+            hasMore: next.hasMore,
+          };
+          setCached(cacheKey(CACHE_NS, params), persisted);
+          return next;
+        });
       } catch (err) {
         if (ac.signal.aborted) return;
         if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -104,10 +129,21 @@ export function useRecipeSearch(
     [paramsKey],
   );
 
-  // Re-fire on param change.
+  // Re-fire on param change. If we have a cached result for these params,
+  // hydrate from it and skip the fetch entirely.
   useEffect(() => {
     if (!enabled) {
       setState(INITIAL);
+      return;
+    }
+    const cached = getCached<CachedState>(cacheKey(CACHE_NS, params));
+    if (cached) {
+      setState({
+        ...INITIAL,
+        results: cached.results,
+        totalResults: cached.totalResults,
+        hasMore: cached.hasMore,
+      });
       return;
     }
     const id = window.setTimeout(() => {
@@ -117,6 +153,8 @@ export function useRecipeSearch(
       window.clearTimeout(id);
       abortRef.current?.abort();
     };
+    // params captured via paramsKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paramsKey, enabled, fetchPage]);
 
   const loadMore = useCallback(() => {
@@ -128,8 +166,12 @@ export function useRecipeSearch(
   }, [fetchPage]);
 
   const refetch = useCallback(() => {
+    // Explicit refresh: evict so the next fetch lands fresh data.
+    evict(cacheKey(CACHE_NS, params));
     void fetchPage(0, false);
-  }, [fetchPage]);
+    // params captured via paramsKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchPage, paramsKey]);
 
   return { ...state, loadMore, refetch };
 }

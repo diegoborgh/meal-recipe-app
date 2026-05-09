@@ -16,18 +16,23 @@ import { EMPTY_FILTERS } from '@/features/search/types';
 import styles from './HomeRoute.module.css';
 
 /**
- * Home — the "Cook" tab landing. Hero + quick filters + a 4-card "Tonight's
+ * Home — the "Cook" tab landing. Hero + quick filters + a 6-card "Tonight's
  * picks" row. Submitting the search box navigates to /search; the chip row
  * does the same with prefilled filters.
+ *
+ * Tonight's picks fetches once per browser session (sessionCache hit on
+ * remount with the same params). The user only sees a fresh API call when
+ * they make a new search — not when they navigate Cook → Recipe → Cook.
  */
 export function HomeRoute() {
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
 
   // "Tonight's picks": light, opinionated query so the home isn't empty.
-  // Sort=random keeps it from feeling stale across visits; cached at the edge.
+  // Same params every render → sessionCache covers re-mounts; only a hard
+  // reload of the tab fetches a new set of picks.
   const { results, loading, error, quotaExceeded, refetch } = useRecipeSearch(
-    { sort: 'random', number: isDesktop ? 4 : 4 },
+    { sort: 'random', number: 6 },
     true,
   );
 
@@ -102,7 +107,7 @@ export function HomeRoute() {
         </button>
       </div>
 
-      {loading && <ResultsSkeleton count={4} />}
+      {loading && <ResultsSkeleton count={6} />}
       {!loading && error && (
         <ErrorState
           {...(quotaExceeded
@@ -116,7 +121,7 @@ export function HomeRoute() {
       )}
       {!loading && !error && (
         <ResultsGrid
-          results={results.slice(0, 4)}
+          results={results.slice(0, 6)}
           hasMore={false}
           loadingMore={false}
           onLoadMore={() => {

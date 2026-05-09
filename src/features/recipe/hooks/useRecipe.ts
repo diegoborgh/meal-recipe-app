@@ -4,20 +4,26 @@
  * Lookup order:
  *   1. Dexie favorites cache. If a `complete: true` row exists, use it
  *      immediately. This is what makes saved recipes work offline.
- *   2. Fall through to /api/spoonacular → /recipes/{id}/information.
+ *   2. Session cache (in-memory). If we've fetched this id this session,
+ *      return the cached recipe — no API call. See src/lib/sessionCache.ts
+ *      for rationale (free tier budget + dev-vs-prod parity).
+ *   3. Fall through to /api/spoonacular → /recipes/{id}/information.
  *
  * Mirrors useRecipeSearch's error model: 402/429 are surfaced as a separate
  * `quotaExceeded` flag so the route can render the calm error state.
  *
- * No retry-on-mount. Stale-while-revalidate happens at the edge cache (24h);
- * when the user navigates away and back, browser cache + edge serve fast.
+ * No retry-on-mount. `refetch()` evicts the session cache entry and forces
+ * a fresh fetch (used by error states' "Try again" button).
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getRecipe } from '@/api/recipe';
 import { ApiError, QuotaError } from '@/api/client';
 import { db } from '@/db';
+import { cacheKey, evict, getCached, setCached } from '@/lib/sessionCache';
 import type { Recipe } from '@/types/recipe';
+
+const CACHE_NS = 'recipe';
 
 export interface UseRecipeState {
   recipe: Recipe | null;
@@ -38,7 +44,7 @@ export function useRecipe(id: number | null): UseRecipeState {
   const [state, setState] = useState(INITIAL);
   const abortRef = useRef<AbortController | null>(null);
 
-  const run = () => {
+  const run = useCallback(() => {
     if (id == null) {
       setState(INITIAL);
       return;
@@ -49,24 +55,30 @@ export function useRecipe(id: number | null): UseRecipeState {
 
     setState((s) => ({ ...s, loading: true, error: null, quotaExceeded: false }));
 
-    // Step 1: try the Dexie cache.
+    // Step 1: Dexie favorites cache.
     db.favorites
       .get(id)
       .then((cached) => {
         if (ac.signal.aborted) return null;
         if (cached && cached.complete) {
-          // Strip the storage-only fields back to the Recipe shape.
           const { savedAt: _savedAt, complete: _complete, ...recipe } = cached;
           setState({ recipe, loading: false, error: null, quotaExceeded: false });
           return null; // signal: don't fetch
+        }
+        // Step 2: session cache.
+        const sessionCached = getCached<Recipe>(cacheKey(CACHE_NS, { id }));
+        if (sessionCached) {
+          setState({ recipe: sessionCached, loading: false, error: null, quotaExceeded: false });
+          return null;
         }
         return 'fetch';
       })
       .then((next) => {
         if (next !== 'fetch' || ac.signal.aborted) return;
-        // Step 2: API.
+        // Step 3: API.
         return getRecipe(id, { signal: ac.signal }).then((recipe) => {
           if (ac.signal.aborted) return;
+          setCached(cacheKey(CACHE_NS, { id }), recipe);
           setState({ recipe, loading: false, error: null, quotaExceeded: false });
         });
       })
@@ -84,14 +96,17 @@ export function useRecipe(id: number | null): UseRecipeState {
           console.error('[useRecipe]', err);
         }
       });
-  };
+  }, [id]);
 
   useEffect(() => {
     run();
     return () => abortRef.current?.abort();
-    // run is intentionally stable per id — recreate on id change only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [run]);
 
-  return { ...state, refetch: run };
+  const refetch = useCallback(() => {
+    if (id != null) evict(cacheKey(CACHE_NS, { id }));
+    run();
+  }, [id, run]);
+
+  return { ...state, refetch };
 }

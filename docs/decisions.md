@@ -13,6 +13,11 @@ Entries should be brief. Format:
 
 ---
 
+## 2026-05-08 — Session-scoped in-memory cache for search + recipe detail
+**Decision:** Added `src/lib/sessionCache.ts` (module-scoped Map, no TTL). Both `useRecipeSearch` and `useRecipe` read/write it: same params/id within the browser session returns cached data, no API call. `refetch()` evicts the entry then re-fetches.
+**Why:** Free tier is 150 pts/day. Without this, clicking Cook → Recipe → Cook three times burns three searches because `vercel dev` doesn't run production edge caching locally — and even in production the edge cache reduces *server cost* but the browser still does the round-trip on every navigation. The session cache eliminates the round-trip and makes Home's "Tonight's picks" feel intentional (same picks for the session). Cache lives until tab close.
+**Reversible?** Yes — single primitive consumed in two hooks.
+
 ## 2026-05-08 — Preferences merge into search at the API boundary
 **Decision:** SearchRoute computes `searchInputs` for `useRecipeSearch` by:
 - Diet: `filters.diet ?? preferences.diet` (per-search overrides the pref default).
