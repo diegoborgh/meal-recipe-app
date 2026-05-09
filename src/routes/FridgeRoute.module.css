@@ -1,0 +1,121 @@
+.page {
+  padding: 8px 22px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .page {
+    padding: 0;
+  }
+}
+
+.header {
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.6px;
+  color: var(--color-ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+@media (min-width: 1024px) {
+  .title {
+    font-size: 44px;
+    letter-spacing: -1px;
+  }
+}
+
+.titleAccent {
+  color: var(--color-accent-2);
+  font-style: italic;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-ink-soft);
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 1024px) {
+  .subtitle { font-size: 14px; margin-top: 6px; }
+}
+
+.resultsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 18px 0 12px;
+}
+
+@media (min-width: 1024px) {
+  .resultsHead { margin: 28px 0 16px; }
+}
+
+.resultsCount {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+}
+
+.resultsCountStrong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .resultsCount {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .resultsCountStrong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+}
+
+.sortHint {
+  font-size: 11px;
+  color: var(--color-accent-2);
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .sortHint { font-size: 12px; }
+}
+
+/* Mobile rows. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Desktop grid (responsive — same breakpoints as ResultsGrid). */
+@media (min-width: 768px) {
+  .list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+@media (min-width: 1024px) {
+  .list { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+}
+@media (min-width: 1400px) {
+  .list { grid-template-columns: repeat(4, 1fr); }
+}
+
+.errorWrap {
+  margin-top: 24px;
+}
+
+.loadingHint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  font-style: italic;
+}

@@ -13,6 +13,21 @@ Entries should be brief. Format:
 
 ---
 
+## 2026-05-08 — Fridge: ranking=1 + ignorePantry=true on findByIngredients
+**Decision:** Fridge calls Spoonacular's `/recipes/findByIngredients` with `ranking=1` (maximize used) and `ignorePantry=true`. Page size capped at 20.
+**Why:** Without `ignorePantry` every recipe shows "missing salt / oil / pepper" which is noise. ranking=1 matches the design's "Most matches first" hint; ranking=2 (minimize missing) yields a similar but slightly different ordering and is harder to explain to users. 20 results is a good utility/budget trade — findByIngredients is ~1pt per result.
+**Reversible?** Yes — three params on a single API wrapper.
+
+## 2026-05-08 — Fridge results cache key is order-independent
+**Decision:** `useFridgeRecipes` sorts the ingredient list before computing the session-cache key. So adding "eggs, spinach" gives the same cached results as "spinach, eggs".
+**Why:** The user's perception is "I have these ingredients" — order is incidental. Sorting eliminates spurious cache misses when chips are reordered or rebuilt in a different sequence.
+**Reversible?** Yes — drop the `sort()` call.
+
+## 2026-05-08 — Fridge primary key is the lowercased ingredient name
+**Decision:** Dexie `fridge` table primary key = `name` (lowercased). Re-adding "Eggs" after "eggs" is a no-op via natural dedup. Spoonacular id is stored alongside but not the key.
+**Why:** Users free-type ingredients; the same ingredient typed twice with different casing should be one row. Spoonacular id is nullable since users can also add custom names not in the Spoonacular database.
+**Reversible?** Yes — would need a v2 migration to swap key.
+
 ## 2026-05-08 — Session-scoped in-memory cache for search + recipe detail
 **Decision:** Added `src/lib/sessionCache.ts` (module-scoped Map, no TTL). Both `useRecipeSearch` and `useRecipe` read/write it: same params/id within the browser session returns cached data, no API call. `refetch()` evicts the entry then re-fetches.
 **Why:** Free tier is 150 pts/day. Without this, clicking Cook → Recipe → Cook three times burns three searches because `vercel dev` doesn't run production edge caching locally — and even in production the edge cache reduces *server cost* but the browser still does the round-trip on every navigation. The session cache eliminates the round-trip and makes Home's "Tonight's picks" feel intentional (same picks for the session). Cache lives until tab close.

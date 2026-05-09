@@ -1,0 +1,65 @@
+/*
+ * Fridge onboarding state. Shows below the (empty) chip input on the route
+ * — provides starter chips and a brief "How this works" callout.
+ */
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.starters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.howCard {
+  display: flex;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-16);
+  padding: 18px;
+}
+
+.howIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--badge-olive-bg);
+  color: var(--color-accent-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.howTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.howBody {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  line-height: 1.5;
+}

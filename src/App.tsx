@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { OnlineProvider } from './context/OnlineContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { FridgeProvider } from './context/FridgeContext';
 import { RootLayout } from './routes/RootLayout';
 import { CookModeLayout } from './routes/CookModeLayout';
 import { HomeRoute } from './routes/HomeRoute';
@@ -22,6 +23,7 @@ export default function App() {
     <OnlineProvider>
       <PreferencesProvider>
         <FavoritesProvider>
+          <FridgeProvider>
           <BrowserRouter>
             <Routes>
               {/* Cook Mode bypasses RootLayout — its own dark, edge-to-edge shell. */}
@@ -41,6 +43,7 @@ export default function App() {
               </Route>
             </Routes>
           </BrowserRouter>
+          </FridgeProvider>
         </FavoritesProvider>
       </PreferencesProvider>
     </OnlineProvider>
