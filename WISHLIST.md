@@ -30,6 +30,11 @@ note where it would land + a one-liner on why it's deferred.
   chevron. Filters type already carries `sort`; just needs UI. Slice 9 / post.
 - **Bottom-sheet swipe-to-dismiss** — currently sheets close via scrim tap or
   Esc only. iOS users will reach for the swipe. Slice 9.
+- **iOS splash-screen PNGs** — manifest covers most platforms; iOS wants
+  per-device-size PNGs (10+ sizes) for a pixel-perfect splash. Currently
+  iOS falls back to the manifest background + icon, which works but isn't
+  identity-perfect. Generate via the existing `scripts/generate-icons.mjs`
+  pattern (sharp). Slice 9.
 - **Calorie goal — apply automatically** — v1 stores the goal but doesn't
   use it in search. Future: surface a "fits your day" badge on cards, or
   set a default `maxCalories` filter to (target / 3) for dinner queries.

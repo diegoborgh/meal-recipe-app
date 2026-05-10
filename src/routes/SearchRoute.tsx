@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/states';
+import { useOnline } from '@/context/OnlineContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { HeroSearch } from '@/features/search/components/HeroSearch';
@@ -49,6 +50,7 @@ export function SearchRoute() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sheetOpen, setSheetOpen] = useState(false);
   const { preferences } = usePreferences();
+  const online = useOnline();
 
   const filters: Filters = useMemo(
     () => filtersFromSearchParams(searchParams),
@@ -198,15 +200,27 @@ export function SearchRoute() {
           )}
 
           {hasAnyInput && search.error && search.results.length === 0 && (
-            <ErrorState
-              {...(search.quotaExceeded
-                ? {
-                    title: 'Caught our breath.',
-                    body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
-                  }
-                : {})}
-              onRetry={search.refetch}
-            />
+            !online ? (
+              <ErrorState
+                title="You're offline."
+                body="Search needs a connection. Your saved recipes work without one."
+                action={{
+                  label: 'Browse saved',
+                  icon: 'bookmark',
+                  onClick: () => navigate('/favorites'),
+                }}
+              />
+            ) : (
+              <ErrorState
+                {...(search.quotaExceeded
+                  ? {
+                      title: 'Caught our breath.',
+                      body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
+                    }
+                  : {})}
+                onRetry={search.refetch}
+              />
+            )
           )}
 
           {hasAnyInput &&

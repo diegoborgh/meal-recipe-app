@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon';
 import { SkilletWordmark } from '@/components/SkilletWordmark';
 import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/states';
+import { useOnline } from '@/context/OnlineContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { HeroSearch } from '@/features/search/components/HeroSearch';
 import { QuickChips } from '@/features/search/components/QuickChips';
@@ -27,6 +28,7 @@ import styles from './HomeRoute.module.css';
 export function HomeRoute() {
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
+  const online = useOnline();
 
   // "Tonight's picks": light, opinionated query so the home isn't empty.
   // Same params every render → sessionCache covers re-mounts; only a hard
@@ -109,15 +111,27 @@ export function HomeRoute() {
 
       {loading && <ResultsSkeleton count={6} />}
       {!loading && error && (
-        <ErrorState
-          {...(quotaExceeded
-            ? {
-                title: 'Caught our breath.',
-                body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
-              }
-            : {})}
-          onRetry={refetch}
-        />
+        !online ? (
+          <ErrorState
+            title="You're offline."
+            body="Tonight's picks need a connection. Your saved recipes are always available."
+            action={{
+              label: 'Browse saved',
+              icon: 'bookmark',
+              onClick: () => navigate('/favorites'),
+            }}
+          />
+        ) : (
+          <ErrorState
+            {...(quotaExceeded
+              ? {
+                  title: 'Caught our breath.',
+                  body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
+                }
+              : {})}
+            onRetry={refetch}
+          />
+        )
       )}
       {!loading && !error && (
         <ResultsGrid

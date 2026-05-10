@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { MobileNav } from '@/components/MobileNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { OfflineBanner } from '@/components/states';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { UndoToast } from '@/features/favorites/components/UndoToast';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import styles from './RootLayout.module.css';
@@ -21,6 +22,7 @@ export function RootLayout() {
 
       <div className={styles.main}>
         <OfflineBanner />
+        <UpdateBanner />
         <div
           className={`${styles.content} ${
             isDesktop ? styles.contentDesktop : styles.contentMobile

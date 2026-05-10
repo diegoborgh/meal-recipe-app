@@ -1,0 +1,67 @@
+/*
+ * Sticky banner shown when a new service worker has installed and is ready
+ * to take over. Mounted at RootLayout above the main content (below the
+ * OfflineBanner) so it sits in the top stack of the page.
+ */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-honey);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.refresh {
+  background: var(--color-ink);
+  color: #fff;
+  font-weight: 700;
+}
+
+.refresh:hover {
+  filter: brightness(1.1);
+}
+
+.dismiss {
+  background: transparent;
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+.dismiss:hover {
+  opacity: 1;
+}

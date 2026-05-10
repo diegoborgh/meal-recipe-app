@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/Button';
+import { useNavigate } from 'react-router-dom';
 import { ErrorState } from '@/components/states';
 import { useFridge } from '@/context/FridgeContext';
+import { useOnline } from '@/context/OnlineContext';
 import { FridgeCard } from '@/features/fridge/components/FridgeCard';
 import { FridgeEmpty } from '@/features/fridge/components/FridgeEmpty';
 import { IngredientChipInput } from '@/features/fridge/components/IngredientChipInput';
@@ -26,6 +28,8 @@ import styles from './FridgeRoute.module.css';
  */
 export function FridgeRoute() {
   const isDesktop = useIsDesktop();
+  const navigate = useNavigate();
+  const online = useOnline();
   const { names, loaded } = useFridge();
   const isEmpty = loaded && names.length === 0;
 
@@ -124,15 +128,27 @@ export function FridgeRoute() {
 
               {error && matches.length === 0 ? (
                 <div className={styles.errorWrap}>
-                  <ErrorState
-                    {...(quotaExceeded
-                      ? {
-                          title: 'Caught our breath.',
-                          body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
-                        }
-                      : {})}
-                    onRetry={refetch}
-                  />
+                  {!online ? (
+                    <ErrorState
+                      title="You're offline."
+                      body="Finding fridge matches needs a connection. Your saved recipes work without one."
+                      action={{
+                        label: 'Browse saved',
+                        icon: 'bookmark',
+                        onClick: () => navigate('/favorites'),
+                      }}
+                    />
+                  ) : (
+                    <ErrorState
+                      {...(quotaExceeded
+                        ? {
+                            title: 'Caught our breath.',
+                            body: 'We’ve hit today’s recipe quota. Try again later, or tap into your saved recipes.',
+                          }
+                        : {})}
+                      onRetry={refetch}
+                    />
+                  )}
                 </div>
               ) : matches.length === 0 && !loading ? (
                 <ErrorState

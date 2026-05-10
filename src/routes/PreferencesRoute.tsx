@@ -9,6 +9,7 @@ import {
 } from '@/context/PreferencesContext';
 import { CalorieGoalSlider } from '@/features/preferences/components/CalorieGoalSlider';
 import { ConfirmDialog } from '@/features/preferences/components/ConfirmDialog';
+import { InstallPrompt } from '@/features/preferences/components/InstallPrompt';
 import { PrefGroup } from '@/features/preferences/components/PrefGroup';
 import { UnitToggle } from '@/features/recipe/components/UnitToggle';
 import { DIETS, INTOLERANCES } from '@/features/search/types';
@@ -113,6 +114,10 @@ export function PreferencesRoute() {
             onChange={(u: Units) => void setUnits(u)}
           />
         </PrefGroup>
+
+        {/* Install / iOS-instructions card. Renders nothing on platforms
+            with no install path. */}
+        <InstallPrompt />
       </div>
 
       <div className={styles.dataActions}>

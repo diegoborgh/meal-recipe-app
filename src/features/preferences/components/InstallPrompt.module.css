@@ -1,0 +1,61 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-12);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--badge-honey-bg);
+  color: var(--badge-honey-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  margin-bottom: 2px;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  line-height: 1.4;
+}
+
+.installed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-accent-2);
+  font-weight: 600;
+}
+
+/* iOS instructions list (small inline). */
+.iosSteps {
+  margin-top: 8px;
+  padding-left: 16px;
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  line-height: 1.55;
+}
+.iosSteps li {
+  list-style: decimal;
+}

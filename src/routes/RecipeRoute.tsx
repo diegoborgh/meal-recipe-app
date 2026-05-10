@@ -5,6 +5,7 @@ import { DietBadge } from '@/components/DietBadge';
 import { Icon } from '@/components/Icon';
 import { ErrorState, LoadingState } from '@/components/states';
 import { useFavorites } from '@/context/FavoritesContext';
+import { useOnline } from '@/context/OnlineContext';
 import { usePreferences, type Units } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { IngredientsList } from '@/features/recipe/components/IngredientsList';
@@ -32,6 +33,7 @@ export function RecipeRoute() {
   const { id: idParam } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
+  const online = useOnline();
   const { isSaved, toggle } = useFavorites();
   const { preferences } = usePreferences();
 
@@ -68,15 +70,27 @@ export function RecipeRoute() {
   if (error || !recipe) {
     return (
       <div className={styles.errorWrap}>
-        <ErrorState
-          {...(quotaExceeded
-            ? {
-                title: 'Caught our breath.',
-                body: 'We’ve hit today’s recipe quota. Try again later.',
-              }
-            : {})}
-          onRetry={refetch}
-        />
+        {!online ? (
+          <ErrorState
+            title="You're offline."
+            body="This recipe isn't saved on this device, so we can't load it without a connection. Try one of your saved recipes instead."
+            action={{
+              label: 'Browse saved',
+              icon: 'bookmark',
+              onClick: () => navigate('/favorites'),
+            }}
+          />
+        ) : (
+          <ErrorState
+            {...(quotaExceeded
+              ? {
+                  title: 'Caught our breath.',
+                  body: 'We’ve hit today’s recipe quota. Try again later.',
+                }
+              : {})}
+            onRetry={refetch}
+          />
+        )}
       </div>
     );
   }

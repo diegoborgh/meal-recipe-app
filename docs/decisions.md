@@ -13,6 +13,31 @@ Entries should be brief. Format:
 
 ---
 
+## 2026-05-09 — SW updates: prompt mode + UpdateBanner, no auto-reload
+**Decision:** Switched `vite-plugin-pwa` from `registerType: 'autoUpdate'` to `'prompt'`. New SWs install in the background but a `UpdateBanner` (mounted at RootLayout) surfaces "A fresher version is ready · Refresh" — the user clicks Refresh to apply. A "Later" dismiss hides it for the session.
+**Why:** Auto-update can swap the bundle mid-task (e.g. while reading a Cook Mode step) and the next navigation gets a different JS chunk. Surface the choice; let the user pick the moment.
+**Reversible?** Yes — flip `registerType` back; the banner becomes a no-op.
+
+## 2026-05-09 — Install prompt: native button on Chromium, manual instructions on iOS
+**Decision:** `src/pwa/install.ts` captures `beforeinstallprompt` at app boot (before React mounts — Chromium fires early). The `InstallPrompt` component on the Preferences screen renders three states: `available` (button → triggerInstall), `installed` (small confirmation), or `unavailable` + iOS detected (Safari "Add to Home Screen" instructions). Renders nothing on platforms with no install path (desktop Firefox, etc.).
+**Why:** A user on Chromium gets a single-tap install. iOS doesn't fire the event but supports manual install — instructions are better than silence. Hiding the surface entirely on unsupported platforms avoids dead UI.
+**Reversible?** Yes.
+
+## 2026-05-09 — Manifest shortcuts for the three top-level features
+**Decision:** Added `shortcuts` to the manifest pointing at `/search`, `/favorites`, `/fridge`. Long-press the home-screen icon on Android for the menu; iOS ignores them (no-op there). Also added `categories`, `lang`, `dir`, `orientation`.
+**Why:** Cheap to add, useful when supported, safe everywhere.
+**Reversible?** Yes — drop the array.
+
+## 2026-05-09 — Offline-aware error states route to "Browse saved" instead of "Try again"
+**Decision:** Search / Fridge / Recipe / Home all detect `navigator.onLine` (via `useOnline()`) at error time. When offline + no cached results, the ErrorState shows an offline-specific copy and the action button becomes "Browse saved" (navigates to /favorites) instead of the default "Try again". Online path is unchanged.
+**Why:** "Try again" is a poor affordance when the user fundamentally can't get a connection. Steering toward what they CAN do (saved recipes are always available) is the right product move.
+**Reversible?** Yes — drop the `online` branch.
+
+## 2026-05-09 — `ErrorState` gained an `action` prop for non-retry primary buttons
+**Decision:** Extended `ErrorState` with an optional `action: { label, icon, onClick }` prop. When present, replaces the default Try-again button. Pre-existing `onRetry` callers keep working unchanged.
+**Why:** Offline messaging needs a custom CTA ("Browse saved"); previous API only allowed a retry.
+**Reversible?** Yes — additive.
+
 ## 2026-05-08 — Fridge: ranking=1 + ignorePantry=true on findByIngredients
 **Decision:** Fridge calls Spoonacular's `/recipes/findByIngredients` with `ranking=1` (maximize used) and `ignorePantry=true`. Page size capped at 20.
 **Why:** Without `ignorePantry` every recipe shows "missing salt / oil / pepper" which is noise. ranking=1 matches the design's "Most matches first" hint; ranking=2 (minimize missing) yields a similar but slightly different ordering and is harder to explain to users. 20 results is a good utility/budget trade — findByIngredients is ~1pt per result.

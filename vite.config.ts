@@ -15,18 +15,50 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' = surface the update via in-app UI (UpdateBanner) instead
+      // of silently swapping mid-session. See src/pwa/register.ts.
+      registerType: 'prompt',
       injectRegister: false, // we register manually in src/pwa/register.ts
       includeAssets: ['favicon.svg', 'icons/*.png', 'splash/*.png'],
       manifest: {
-        name: 'Skillet',
+        name: 'Skillet — Come into the kitchen',
         short_name: 'Skillet',
         description: 'A local-first meal recipe PWA. Come into the kitchen.',
+        lang: 'en',
+        dir: 'ltr',
         theme_color: '#C0502B',
         background_color: '#F6F1E8',
         display: 'standalone',
+        orientation: 'portrait',
         start_url: '/',
         scope: '/',
+        categories: ['food', 'lifestyle', 'utilities'],
+        // App shortcuts — long-press the home-screen icon (Android / Chrome
+        // OS) to jump straight into a feature. iOS doesn't honor these yet
+        // but it's a no-op there.
+        shortcuts: [
+          {
+            name: 'Search recipes',
+            short_name: 'Search',
+            description: 'Find recipes by name or filters',
+            url: '/search',
+            icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Saved recipes',
+            short_name: 'Saved',
+            description: 'Your cookbook',
+            url: '/favorites',
+            icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+          },
+          {
+            name: "What's in my fridge",
+            short_name: 'Fridge',
+            description: 'Find recipes from ingredients on hand',
+            url: '/fridge',
+            icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+          },
+        ],
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
