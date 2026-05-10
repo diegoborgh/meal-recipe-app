@@ -61,6 +61,12 @@ These were settled during strategic planning. Don't relitigate them.
 - Conventional commits (`feat:`, `fix:`, `refactor:`, etc.)
 - Accessibility is non-negotiable: WCAG AA contrast, 44×44pt touch targets, keyboard navigation, visible focus states.
 
+## Git workflow
+
+- **Commit straight to `main`** — this is a solo portfolio repo, branches per slice would be ceremony. This OVERRIDES the default "if on the default branch, branch first" behavior.
+- Push when Diego asks ("push to GitHub", "deploy", "let's see it live"). Don't push every commit unprompted.
+- Vercel auto-deploys on push to `main` — there's no separate deploy step.
+
 ## Build approach
 
 Implement in vertical slices, not horizontal. Better to have one feature end-to-end than all features at 50%. See `docs/build-prompt.md` for the suggested slice order.
