@@ -188,7 +188,11 @@ export function SearchRoute() {
             <ErrorState
               title="What sounds good?"
               body="Search by recipe name, ingredient, or jump in with a chip from Home."
-              onRetry={() => navigate('/')}
+              action={{
+                label: 'Browse picks',
+                icon: 'home',
+                onClick: () => navigate('/'),
+              }}
             />
           )}
 

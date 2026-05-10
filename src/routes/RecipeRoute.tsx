@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/Button';
 import { DietBadge } from '@/components/DietBadge';
 import { Icon } from '@/components/Icon';
-import { ErrorState, LoadingState } from '@/components/states';
+import { ErrorState } from '@/components/states';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useOnline } from '@/context/OnlineContext';
 import { usePreferences, type Units } from '@/context/PreferencesContext';
+import { RecipeDetailSkeleton } from '@/features/recipe/components/RecipeDetailSkeleton';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { IngredientsList } from '@/features/recipe/components/IngredientsList';
 import { InstructionsList } from '@/features/recipe/components/InstructionsList';
@@ -50,21 +51,25 @@ export function RecipeRoute() {
   const servings =
     servingsOverride ?? recipe?.servings ?? 1;
 
-  // Bad id
+  // Bad id — invalid or non-numeric URL segment.
   if (id == null) {
     return (
       <div className={styles.errorWrap}>
         <ErrorState
           title="That recipe doesn’t exist."
           body="The link may be old or mistyped."
-          onRetry={() => navigate('/')}
+          action={{
+            label: 'Back to Cook',
+            icon: 'home',
+            onClick: () => navigate('/'),
+          }}
         />
       </div>
     );
   }
 
   if (loading || (!recipe && !error)) {
-    return <LoadingState label="Loading recipe…" />;
+    return <RecipeDetailSkeleton />;
   }
 
   if (error || !recipe) {

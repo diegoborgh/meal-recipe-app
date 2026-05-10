@@ -1,0 +1,59 @@
+/*
+ * Cook Mode loading skeleton. Mirrors the CookStep layout — massive number
+ * placeholder + step-text placeholder. Surfaces are translucent white
+ * overlays so they read as cards on the cook-mode dark base.
+ */
+
+.frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px 32px 24px;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .frame {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 80px;
+    gap: 80px;
+  }
+}
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-8);
+  animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; }
+}
+
+.numberWrap {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .numberWrap { flex: 1; }
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

@@ -4,6 +4,7 @@ import { ErrorState } from '@/components/states';
 import { usePreferences, type Units } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { CookBottomBar } from '@/features/cook/components/CookBottomBar';
+import { CookSkeleton } from '@/features/cook/components/CookSkeleton';
 import { CookStep } from '@/features/cook/components/CookStep';
 import { CookTopBar } from '@/features/cook/components/CookTopBar';
 import { IngredientsPeek } from '@/features/cook/components/IngredientsPeek';
@@ -61,7 +62,11 @@ export function CookRoute() {
           <ErrorState
             title="That recipe doesn’t exist."
             body="The link may be old or mistyped."
-            onRetry={() => navigate('/')}
+            action={{
+              label: 'Back to Cook',
+              icon: 'home',
+              onClick: () => navigate('/'),
+            }}
           />
         </div>
       </div>
@@ -71,7 +76,9 @@ export function CookRoute() {
   if (loading || (!recipe && !error)) {
     return (
       <div className={styles.shell}>
-        <div className={styles.loadingWrap}>Setting the table…</div>
+        <div className={styles.body}>
+          <CookSkeleton />
+        </div>
       </div>
     );
   }
@@ -104,7 +111,11 @@ export function CookRoute() {
           <ErrorState
             title="No step-by-step here."
             body="This recipe doesn’t have structured steps. The source link on the recipe page should have the full method."
-            onRetry={() => navigate(`/recipe/${id}`)}
+            action={{
+              label: 'Back to recipe',
+              icon: 'arrowL',
+              onClick: () => navigate(`/recipe/${id}`),
+            }}
           />
         </div>
       </div>

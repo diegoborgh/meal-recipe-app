@@ -1,0 +1,156 @@
+/*
+ * Layout-shaped placeholder for RecipeRoute. Mobile + desktop variants
+ * mirror the actual layout so the cold paint feels like the same screen
+ * filling in, not a generic spinner.
+ *
+ * .skel is the shimmer base used everywhere; size + radius are inline-styled
+ * per usage.
+ */
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-deep) 0%,
+    var(--color-surface-alt) 50%,
+    var(--color-bg-deep) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-8);
+  animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; }
+}
+
+/* ── Mobile path ─────────────────────────────────────────────────────── */
+.mobileShell {
+  display: flex;
+  flex-direction: column;
+  margin: -16px -22px 0; /* bleed past RootLayout's mobile padding */
+}
+
+.mobileHero {
+  height: 320px;
+  border-radius: 0;
+}
+
+.mobileSheet {
+  background: var(--color-bg);
+  margin-top: -28px;
+  border-top-left-radius: var(--radius-24);
+  border-top-right-radius: var(--radius-24);
+  padding: 24px 22px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.statsStrip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-12);
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.macroRow {
+  display: flex;
+  gap: 8px;
+}
+
+.macroPill {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-12);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ingredientList {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-12);
+  overflow: hidden;
+}
+
+.ingredientRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.ingredientRow + .ingredientRow {
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.stepBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+/* ── Desktop path ────────────────────────────────────────────────────── */
+.desktopGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+}
+
+.desktopLeft,
+.desktopRight {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.desktopRight {
+  gap: 18px;
+}
+
+.desktopHero {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-16);
+  overflow: hidden;
+}

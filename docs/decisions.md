@@ -13,6 +13,21 @@ Entries should be brief. Format:
 
 ---
 
+## 2026-05-10 — Top-level error boundary outside the providers
+**Decision:** Added `src/components/ErrorBoundary` and mounted it in `main.tsx` outside `<App />`. Uses the React 18 class-component pattern (`getDerivedStateFromError` + `componentDidCatch`). Fallback UI is calm-not-alarming with Reload + Back-to-Cook CTAs and an expandable details block for the developer.
+**Why:** Until this slice, any thrown render error blanked the entire tree (we hit this with the slice-7 Dexie `orderBy` bug — `useLiveQuery` rethrows errors and there was no boundary to catch). Now the user sees a recoverable surface with data intact (Dexie persists across reloads).
+**Reversible?** Yes — drop the boundary; the tree blanks again on errors.
+
+## 2026-05-10 — Bespoke layout-shaped skeletons for Recipe + Cook
+**Decision:** Replaced generic `<LoadingState />` on RecipeRoute with `RecipeDetailSkeleton` whose layout matches the eventual page (hero, stats strip, macro pills, ingredient rows, step rows). Same treatment on CookRoute via `CookSkeleton` (massive number block + step text lines, in cook-mode translucent overlays).
+**Why:** Generic spinners cause visible layout shift when content arrives. Layout-shaped skeletons make cold paint feel like the page filling in. Especially valuable on Cook Mode where the phone is propped up and any visual jolt is jarring.
+**Reversible?** Yes — drop the components and revert to LoadingState.
+
+## 2026-05-10 — Empty-state copy audit: navigation actions != retry
+**Decision:** Several routes were using `onRetry` to render a "Try again" button when the action was actually navigation (SearchRoute "What sounds good?", RecipeRoute bad-id, CookRoute bad-id, CookRoute no-instructions, FridgeRoute no-matches). Switched to ErrorState's `action={…}` prop with honest labels ("Browse picks", "Back to Cook", "Back to recipe") or removed the button entirely.
+**Why:** "Try again" implies a transient failure to retry; honest labels describe what the button actually does.
+**Reversible?** Yes.
+
 ## 2026-05-09 — SW updates: prompt mode + UpdateBanner, no auto-reload
 **Decision:** Switched `vite-plugin-pwa` from `registerType: 'autoUpdate'` to `'prompt'`. New SWs install in the background but a `UpdateBanner` (mounted at RootLayout) surfaces "A fresher version is ready · Refresh" — the user clicks Refresh to apply. A "Later" dismiss hides it for the session.
 **Why:** Auto-update can swap the bundle mid-task (e.g. while reading a Cook Mode step) and the next navigation gets a different JS chunk. Surface the choice; let the user pick the moment.

@@ -154,7 +154,6 @@ export function FridgeRoute() {
                 <ErrorState
                   title="Nothing matches yet."
                   body="Try adding one or two more ingredients — variety helps."
-                  onRetry={refetch}
                 />
               ) : (
                 <div className={styles.list}>

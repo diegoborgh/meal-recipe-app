@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { setupInstallCapture } from './pwa/install';
 import { registerServiceWorker } from './pwa/register';
 
@@ -15,7 +16,11 @@ setupInstallCapture();
 
 createRoot(rootEl).render(
   <StrictMode>
-    <App />
+    {/* Outermost: any error in providers, router, or routes lands here
+        instead of taking down the whole tree. */}
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
 
