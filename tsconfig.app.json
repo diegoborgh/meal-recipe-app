@@ -21,9 +21,12 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
-    "baseUrl": ".",
+    // No baseUrl: deprecated in TS 5+ and stops working in TS 7. `paths`
+    // resolves relative to this tsconfig's location by default, so the
+    // `@/*` alias still works without it. Vite has its own alias in
+    // vite.config.ts; this is purely for the language server.
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     "types": ["vite/client", "vite-plugin-pwa/client"]
