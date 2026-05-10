@@ -12,6 +12,27 @@ import type { Recipe, RecipeSummary } from '@/types/recipe';
 import { db, type FavoriteRow } from './index';
 
 /**
+ * Fire a no-op image fetch so the service worker's CacheFirst rule for
+ * Spoonacular CDN images warms its cache. Used after save/upgrade so the
+ * favorites list and recipe-detail hero render correctly when the user
+ * switches to offline before opening the recipe.
+ *
+ * Why this is needed: complexSearch (search results) and /recipes/{id}/
+ * information (detail upgrade) return DIFFERENT Spoonacular image sizes
+ * (e.g. 312x231 vs 556x370). The card-tap that saved the recipe cached
+ * one URL; the upgrade replaced it with another that's never been
+ * fetched. Without this preload, the favorites list breaks images on
+ * the first offline session after a save.
+ */
+function preloadImage(url: string | undefined): void {
+  if (!url || typeof window === 'undefined') return;
+  // No event handlers, no DOM insertion — just kick the request through
+  // the network stack so the SW intercepts and caches it.
+  const img = new Image();
+  img.src = url;
+}
+
+/**
  * Fill in a Recipe shape from a RecipeSummary. The missing detail fields get
  * empty defaults so the row matches the Recipe type and the favorites list
  * (which only reads summary fields) still works correctly.
@@ -45,6 +66,9 @@ export async function saveFavorite(summary: RecipeSummary): Promise<void> {
     complete: false,
   };
   await db.favorites.put(optimistic);
+  // Defensive — usually already cached because the user just clicked the
+  // card, but handles the edge case (saved-via-undo from a different view).
+  preloadImage(summary.image);
 
   // Upgrade in the background. Errors are non-fatal — the favorite still works
   // for offline list display; the detail page will fall back to API.
@@ -75,11 +99,15 @@ export async function upgradeFavorite(id: number): Promise<void> {
     complete: true,
   };
   await db.favorites.put(upgraded);
+  // Pre-warm the SW image cache for the upgraded URL — see preloadImage().
+  preloadImage(upgraded.image);
 }
 
 /** Re-add a previously-removed favorite (for the undo toast). */
 export async function restoreFavorite(row: FavoriteRow): Promise<void> {
   await db.favorites.put(row);
+  // Re-prime the image cache in case it expired between removal and undo.
+  preloadImage(row.image);
   // If the restored row was incomplete, kick the upgrade again.
   if (!row.complete) {
     void upgradeFavorite(row.id).catch(() => {});
