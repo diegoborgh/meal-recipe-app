@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  isDesktopSafari,
   isIOS,
   subscribeToInstall,
   triggerInstall,
@@ -8,8 +9,11 @@ import {
 
 export interface UsePwaInstall {
   state: InstallState;
-  /** True when the platform is iOS — caller shows manual instructions. */
+  /** True when the platform is iOS — caller shows Share-sheet instructions. */
   ios: boolean;
+  /** True when the platform is desktop Safari on macOS — caller shows
+   *  File-menu instructions. */
+  desktopSafari: boolean;
   /** Trigger the install prompt. No-op when state !== 'available'. */
   install: () => Promise<'accepted' | 'dismissed' | 'unavailable'>;
 }
@@ -28,6 +32,7 @@ export function usePwaInstall(): UsePwaInstall {
   return {
     state,
     ios: isIOS(),
+    desktopSafari: isDesktopSafari(),
     install: triggerInstall,
   };
 }

@@ -6,16 +6,17 @@ import styles from './InstallPrompt.module.css';
 /**
  * Install prompt UI for the Preferences screen.
  *
- * Three states:
+ * States:
+ *   - Already installed (running standalone) → small confirmation, no CTA.
  *   - Chromium with install criteria met → "Install Skillet" button that
  *     fires the native browser prompt.
- *   - iOS Safari (no beforeinstallprompt) → manual instructions for Add to
- *     Home Screen.
- *   - Already installed (running standalone) → small confirmation, no CTA.
- *   - Anything else → render nothing (no install path available).
+ *   - iOS Safari → manual Share-sheet instructions (no beforeinstallprompt).
+ *   - Desktop Safari (macOS Sonoma 14+) → manual File-menu instructions
+ *     (also no beforeinstallprompt, no JS API to trigger).
+ *   - Anything else (desktop Firefox, etc.) → render nothing (no install path).
  */
 export function InstallPrompt() {
-  const { state, ios, install } = usePwaInstall();
+  const { state, ios, desktopSafari, install } = usePwaInstall();
 
   if (state === 'installed') {
     return (
@@ -52,8 +53,8 @@ export function InstallPrompt() {
     );
   }
 
-  // No native prompt fired. iOS gets manual instructions; everywhere else
-  // (desktop Firefox, etc.) we hide entirely — there's no path to surface.
+  // No native prompt fired. Two manual paths: iOS Share sheet, macOS
+  // Safari File menu. Otherwise render nothing — no install affordance.
   if (ios) {
     return (
       <div className={styles.card}>
@@ -67,6 +68,33 @@ export function InstallPrompt() {
             <li>Choose <strong>Add to Home Screen</strong>.</li>
             <li>Tap <strong>Add</strong>.</li>
           </ol>
+        </div>
+      </div>
+    );
+  }
+
+  if (desktopSafari) {
+    return (
+      <div className={styles.card}>
+        <div className={styles.icon}>
+          <Icon name="upload" size={20} />
+        </div>
+        <div className={styles.body}>
+          <div className={styles.title}>Add Skillet to your Dock</div>
+          <ol className={styles.iosSteps}>
+            <li>
+              Open the <strong>File</strong> menu in Safari.
+            </li>
+            <li>
+              Choose <strong>Add to Dock…</strong>
+            </li>
+            <li>
+              Click <strong>Add</strong>.
+            </li>
+          </ol>
+          <div className={styles.hint} style={{ marginTop: 6 }}>
+            Requires macOS Sonoma (14) or later.
+          </div>
         </div>
       </div>
     );

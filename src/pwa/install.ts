@@ -98,3 +98,23 @@ export function isIOS(): boolean {
   // iPad pretends to be Mac on iPadOS 13+; check touch points to disambiguate.
   return /iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 }
+
+/**
+ * Desktop Safari on macOS Sonoma 14+ can install PWAs via File → Add to Dock.
+ * There's no JS API to trigger it, so we surface manual instructions when
+ * detected. UA-sniffing is unreliable but fine for an opt-in instructional
+ * surface — we just want to avoid an empty card on Mac Safari.
+ *
+ * Excludes:
+ *   - iPad-pretending-to-be-Mac (handled by isIOS)
+ *   - Chromium-based browsers that ship "Safari" in their UA for compat
+ *     (Chrome / Edge / Brave / Opera) — those get the native prompt path
+ */
+export function isDesktopSafari(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  if (isIOS()) return false;
+  const ua = navigator.userAgent;
+  if (!/Macintosh/.test(ua)) return false;
+  if (/Chrome|Chromium|Edg|OPR|Firefox/.test(ua)) return false;
+  return /Safari\//.test(ua) && /Version\//.test(ua);
+}
