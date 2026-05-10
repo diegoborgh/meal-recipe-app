@@ -56,6 +56,16 @@ on why it's deferred.
   Needs a meal-of-day signal we don't have yet.
 - **JSON Import** — counterpart to the existing Export. File picker,
   validate `schema: 1`, `db.favorites.bulkPut(...)` etc. ~30 minutes.
+  Real-world need: macOS Safari treats Safari and the installed PWA as
+  separate IndexedDB origins, so favorites saved in one don't show up in
+  the other. Import would let users move data across that boundary.
+- **User-named profile + cloud sync** — bigger v2 idea. Pick a name (or
+  sign in via something light — Sign in with Apple, GitHub, or our own
+  magic-link). Sync favorites + preferences + fridge to a small backend
+  (Vercel Postgres / Supabase / Turso). Solves the Safari-PWA storage
+  split, makes the app multi-device, and gives a story for "I lost my
+  laptop." Real architectural shift — would need to revisit the
+  "local-first, no accounts" locked decision.
 - **Vitest + smoke tests** for the API client and Dexie helpers.
 
 ## Engineering
