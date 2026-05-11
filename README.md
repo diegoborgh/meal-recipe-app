@@ -2,6 +2,10 @@
 
 A local-first Meal Recipe Progressive Web App. *Come into the kitchen.*
 
+**Status:** v1 MVP shipped. All nine build slices complete. Live at
+[meal-recipe-app-steel.vercel.app](https://meal-recipe-app-steel.vercel.app).
+Polish + v2 ideas are tracked in [`WISHLIST.md`](WISHLIST.md).
+
 > Install Skillet on your phone, search for a recipe, save the ones you want
 > to come back to, then open the app at the kitchen counter — no Wi-Fi
 > required for what you've already saved.
@@ -141,7 +145,7 @@ npm run preview
 | [`docs/build-prompt.md`](docs/build-prompt.md) | The original build brief (Role / Task / Context / Constraints / Format). |
 | [`docs/design-handoff/`](docs/design-handoff/) | Design bundle from Claude Design — tokens, components, screens. |
 | [`docs/decisions.md`](docs/decisions.md) | Running log of build-time choices not pre-decided in the brief. **Read this first if something looks weird** — it likely explains why. |
-| [`WISHLIST.md`](WISHLIST.md) | Deferred items earmarked for slice 9 (polish) or v2. |
+| [`WISHLIST.md`](WISHLIST.md) | Polish items + v2 candidates. Things deliberately deferred from the MVP. |
 
 ## Known limitations
 
@@ -156,16 +160,19 @@ npm run preview
 - **iOS splash screens** aren't generated as PNGs yet. iOS will use the
   manifest's background color + icon, which works but isn't pixel-perfect.
 
-## v2 candidates
+## What's next
 
 See [`WISHLIST.md`](WISHLIST.md) for the full list. Headliners:
 
-- Dark theme + theme picker
-- Top-level error boundary
-- Import (counterpart to the existing Export)
+- Dark theme + theme picker (v2)
+- Import (counterpart to the existing Export — useful when crossing the
+  Safari ↔ installed-PWA storage boundary)
 - Cook Mode timer card with countdown
 - Sort dropdown on Search
 - Favorites view-toggle (grid/list) and dynamic category chips
+- Bottom-sheet swipe-to-dismiss for the iOS-native feel
+- User profile + cloud sync (v2 — would re-open the locked
+  "local-first, no accounts" decision)
 
 ## License
 
