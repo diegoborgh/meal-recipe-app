@@ -83,6 +83,10 @@ export function HeroSearch({
         onChange={(v) => {
           setText(v);
           setOpen(true);
+          // Clearing the field is a definitive "no query" — commit immediately.
+          // Mid-edit non-empty text still waits for Enter so we don't fire
+          // a search per keystroke.
+          if (v === '' && text !== '') onSubmit('');
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={onKey}
