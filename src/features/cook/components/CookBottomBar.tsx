@@ -26,7 +26,7 @@ export function CookBottomBar({
     <div className={styles.bar}>
       <button
         type="button"
-        className={styles.back}
+        className={`${styles.btn} ${styles.back}`}
         disabled={isFirst}
         onClick={onPrev}
       >
@@ -35,7 +35,7 @@ export function CookBottomBar({
       {isLast ? (
         <button
           type="button"
-          className={`${styles.next} ${styles.done}`}
+          className={`${styles.btn} ${styles.next} ${styles.done}`}
           onClick={onDone}
         >
           Done <Icon name="check" size={22} color="var(--color-bg)" strokeWidth={2.6} />
@@ -43,7 +43,7 @@ export function CookBottomBar({
       ) : (
         <button
           type="button"
-          className={styles.next}
+          className={`${styles.btn} ${styles.next}`}
           onClick={onNext}
         >
           Next <Icon name="arrow" size={22} color="#fff" />
