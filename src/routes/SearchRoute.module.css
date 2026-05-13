@@ -84,12 +84,104 @@
   border-right: 1px solid var(--color-line);
   padding-right: 28px;
   align-self: stretch;
+  transition:
+    width var(--dur-base) var(--ease-out),
+    padding var(--dur-base) var(--ease-out);
+}
+
+/*
+ * Collapsed rail — narrower than the handoff's 64px per Diego (2026-05-12).
+ *
+ * The visible "filter column" the user sees runs from the RootLayout's content
+ * padding (56px) on the left, through the rail, to where the recipe grid
+ * starts. To hit ~75px total visual footprint, the rail pulls leftward with a
+ * negative margin that consumes the route's left padding — so the rail visually
+ * begins at the DesktopSidebar's right edge.
+ *
+ *   filter column = rail (46px) + border (1px) + gap (28px) = ~75px
+ */
+.sidebarCollapsedRail {
+  /*
+   * Widened from 46 → 56 so a 5px inset on each side still clears the 44px
+   * button. Filter column ends up ~85px (56 rail + 1 border + 28 gap).
+   */
+  width: 56px;
+  margin-left: -56px;
+  padding: 28px 5px 24px;
+  padding-right: 5px;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  /*
+   * Cancel the rail's 28px padding-top so the button's top edge aligns with
+   * the inline "FILTERS" label of CollapsedFiltersBar at y=0 of the body.
+   */
+  margin-top: -26px;
+}
+
+.railButton {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.railButton:hover {
+  background: var(--color-line);
+}
+
+.railBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  /* 2px ring in the page bg so the badge lifts off the button cleanly. */
+  border: 2px solid var(--color-bg);
+  box-sizing: content-box;
+  font-variant-numeric: tabular-nums;
+}
+
+.railLabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-top: 4px;
+}
+
+/* Slot for the inline active-filter readout in the results column. */
+.collapsedBarSlot {
+  margin-bottom: 14px;
 }
 
 .sidebarHead {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 18px;
 }
 
@@ -99,6 +191,12 @@
   font-weight: 600;
 }
 
+.sidebarHeadActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .reset {
   background: none;
   border: 0;
@@ -106,6 +204,24 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.sidebarCollapse {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.sidebarCollapse:hover {
+  background: var(--color-line);
 }
 
 .results {

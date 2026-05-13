@@ -13,12 +13,14 @@ export interface ResultsGridProps {
   loadingMore: boolean;
   /** Fired when the sentinel is scrolled near the bottom of the viewport. */
   onLoadMore: () => void;
+  /** Desktop-only: widen the grid to 4 columns (used when the filter sidebar is collapsed). */
+  wide?: boolean;
 }
 
 /** Fixed-count card skeleton shown on the first page load. */
-export function ResultsSkeleton({ count = 6 }: { count?: number }) {
+export function ResultsSkeleton({ count = 6, wide = false }: { count?: number; wide?: boolean }) {
   return (
-    <div className={styles.skeletonGrid}>
+    <div className={`${styles.skeletonGrid} ${wide ? styles.wide : ''}`}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className={styles.cardSkeleton}>
           <div className={styles.cardSkeletonImage} />
@@ -32,7 +34,7 @@ export function ResultsSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-export function ResultsGrid({ results, hasMore, loadingMore, onLoadMore }: ResultsGridProps) {
+export function ResultsGrid({ results, hasMore, loadingMore, onLoadMore, wide = false }: ResultsGridProps) {
   const navigate = useNavigate();
   const { isSaved, toggle } = useFavorites();
   const [sentinelRef, isVisible] = useIntersection<HTMLDivElement>({ rootMargin: '300px' });
@@ -43,7 +45,7 @@ export function ResultsGrid({ results, hasMore, loadingMore, onLoadMore }: Resul
 
   return (
     <>
-      <div className={styles.grid}>
+      <div className={`${styles.grid} ${wide ? styles.wide : ''}`}>
         {results.map((r) => (
           <RecipeCard
             key={r.id}

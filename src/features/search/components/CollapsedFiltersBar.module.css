@@ -1,0 +1,36 @@
+/*
+ * Inline active-filter readout shown in the results column when the desktop
+ * filter sidebar is collapsed to a rail. Per the handoff: small "FILTERS"
+ * label prefix, removable chips, trailing "Edit all" link that re-expands.
+ */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-right: 4px;
+}
+
+.editAll {
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 8px;
+  height: 32px;
+}
+
+.editAll:hover {
+  text-decoration: underline;
+}

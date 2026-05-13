@@ -23,10 +23,12 @@ import {
 import {
   DIETS,
   INTOLERANCES,
+  activeFilterCount,
   type Diet,
   type Filters,
   type Intolerance,
 } from '@/features/search/types';
+import { CollapsedFiltersBar } from '@/features/search/components/CollapsedFiltersBar';
 import { useRecipeSearch } from '@/features/search/hooks/useRecipeSearch';
 import type { SearchParams } from '@/api/search';
 import styles from './SearchRoute.module.css';
@@ -49,6 +51,10 @@ export function SearchRoute() {
   const isDesktop = useIsDesktop();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Default: sidebar expanded. Per Diego's feedback (2026-05-12) we don't
+  // persist this — every page entry starts expanded, the user can collapse
+  // during the session, and a refresh resets back to expanded.
+  const [desktopFiltersCollapsed, setDesktopFiltersCollapsed] = useState(false);
   const { preferences } = usePreferences();
   const online = useOnline();
 
@@ -150,40 +156,103 @@ export function SearchRoute() {
             />
           </div>
         </div>
-        <ActiveFilterChips
-          filters={filters}
-          dispatch={dispatch}
-          lockedDiet={lockedDiet}
-          lockedIntolerances={lockedIntolerances}
-          onOpenFilters={() => (isDesktop ? null : setSheetOpen((v) => !v))}
-        />
+        {/*
+         * Per the collapsible-sidebar design: on desktop, filter readout lives
+         * either inside the (expanded) sidebar or inline above the results
+         * grid (when collapsed) — not in the page header. Mobile/tablet keep
+         * the header chips as the path into the bottom-sheet editor.
+         */}
+        {!isDesktop && (
+          <ActiveFilterChips
+            filters={filters}
+            dispatch={dispatch}
+            lockedDiet={lockedDiet}
+            lockedIntolerances={lockedIntolerances}
+            onOpenFilters={() => setSheetOpen((v) => !v)}
+          />
+        )}
       </div>
 
       <div
         className={`${styles.body} ${isDesktop ? styles.bodyDesktop : styles.bodyMobile}`}
       >
         {isDesktop && (
-          <aside className={styles.sidebar} aria-label="Filters">
-            <div className={styles.sidebarHead}>
-              <div className={styles.sidebarTitle}>Filters</div>
-              <button
-                type="button"
-                className={styles.reset}
-                onClick={() => dispatch({ type: 'reset' })}
-              >
-                Reset
-              </button>
-            </div>
-            <FiltersPanel
-              filters={filters}
-              dispatch={dispatch}
-              lockedDiet={lockedDiet}
-              lockedIntolerances={lockedIntolerances}
-            />
+          <aside
+            className={`${styles.sidebar} ${
+              desktopFiltersCollapsed ? styles.sidebarCollapsedRail : ''
+            }`}
+            aria-label="Filters"
+          >
+            {desktopFiltersCollapsed ? (
+              <div className={styles.rail}>
+                <button
+                  type="button"
+                  className={styles.railButton}
+                  aria-label="Expand filters"
+                  aria-expanded={false}
+                  title="Expand filters"
+                  onClick={() => setDesktopFiltersCollapsed(false)}
+                >
+                  <Icon name="filter" size={18} />
+                  {activeFilterCount(filters) > 0 && (
+                    <span className={styles.railBadge}>
+                      {activeFilterCount(filters)}
+                    </span>
+                  )}
+                </button>
+                <span className={styles.railLabel}>
+                  Filters · {activeFilterCount(filters)}
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className={styles.sidebarHead}>
+                  <div className={styles.sidebarTitle}>Filters</div>
+                  <div className={styles.sidebarHeadActions}>
+                    <button
+                      type="button"
+                      className={styles.reset}
+                      onClick={() => dispatch({ type: 'reset' })}
+                    >
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.sidebarCollapse}
+                      aria-label="Collapse filters"
+                      aria-expanded={true}
+                      title="Collapse filters"
+                      onClick={() => setDesktopFiltersCollapsed(true)}
+                    >
+                      <Icon name="arrowL" size={16} />
+                    </button>
+                  </div>
+                </div>
+                <FiltersPanel
+                  filters={filters}
+                  dispatch={dispatch}
+                  lockedDiet={lockedDiet}
+                  lockedIntolerances={lockedIntolerances}
+                />
+              </>
+            )}
           </aside>
         )}
 
         <div className={styles.results}>
+          {/* Active-filter readout — desktop, collapsed-sidebar only. */}
+          {isDesktop && desktopFiltersCollapsed && (
+            <div className={styles.collapsedBarSlot}>
+              <CollapsedFiltersBar
+                filters={filters}
+                dispatch={dispatch}
+                lockedDiet={lockedDiet}
+                lockedIntolerances={lockedIntolerances}
+                onEditAll={() => setDesktopFiltersCollapsed(false)}
+              />
+            </div>
+          )}
+
           {!hasAnyInput && (
             <ErrorState
               title="What sounds good?"
@@ -199,7 +268,7 @@ export function SearchRoute() {
           {hasAnyInput && search.loading && search.results.length === 0 && (
             <>
               <div className={styles.resultsMeta}>Searching…</div>
-              <ResultsSkeleton count={6} />
+              <ResultsSkeleton count={6} wide={isDesktop && desktopFiltersCollapsed} />
             </>
           )}
 
@@ -247,6 +316,7 @@ export function SearchRoute() {
                 hasMore={search.hasMore}
                 loadingMore={search.loadingMore}
                 onLoadMore={search.loadMore}
+                wide={isDesktop && desktopFiltersCollapsed}
               />
             </>
           )}

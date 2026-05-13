@@ -17,6 +17,15 @@
   .grid { grid-template-columns: repeat(4, 1fr); }
 }
 
+/*
+ * Wide variant: 4-col on desktop. Applied by SearchRoute when the filter
+ * sidebar is collapsed, reclaiming ~236px for an extra column.
+ */
+@media (min-width: 1024px) {
+  .grid.wide,
+  .skeletonGrid.wide { grid-template-columns: repeat(4, 1fr); }
+}
+
 .sentinel {
   height: 64px;
   display: flex;
