@@ -5,13 +5,21 @@ import { usePreferences, type Units } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
 import { CookBottomBar } from '@/features/cook/components/CookBottomBar';
 import { CookSkeleton } from '@/features/cook/components/CookSkeleton';
-import { CookStep } from '@/features/cook/components/CookStep';
+import { CookStep, type CookStepTimerProps } from '@/features/cook/components/CookStep';
 import { CookTopBar } from '@/features/cook/components/CookTopBar';
 import { IngredientsPeek } from '@/features/cook/components/IngredientsPeek';
+import type { TimerCardState } from '@/features/cook/components/TimerCard';
 import { useCookNavigation } from '@/features/cook/hooks/useCookNavigation';
+import { useCountdown } from '@/features/cook/hooks/useCountdown';
 import { useWakeLock } from '@/features/cook/hooks/useWakeLock';
 import { useRecipe } from '@/features/recipe/hooks/useRecipe';
 import styles from './CookRoute.module.css';
+
+interface ActiveTimer {
+  stepIndex: number;
+  totalSec: number;
+  startedAt: number;
+}
 
 /**
  * Cook Mode B — the protected anchor.
@@ -38,7 +46,23 @@ export function CookRoute() {
   const [units] = useState<Units>(preferences.units);
   const [peekOpen, setPeekOpen] = useState(false);
 
+  // Cook Mode timer state — single timer at a time, lifted to the route so
+  // it survives step navigation (slice 3 surfaces it via a persistent pill).
+  // Cleared on exit so re-entering Cook Mode always starts fresh.
+  const [activeTimer, setActiveTimer] = useState<ActiveTimer | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  const { remainingSec, isDone } = useCountdown({
+    startedAt: activeTimer?.startedAt ?? null,
+    totalSec: activeTimer?.totalSec ?? 0,
+    onComplete: useCallback(() => {
+      // Slice 3 will wire WebAudio chime + vibrate here.
+    }, []),
+  });
+
   const exit = useCallback(() => {
+    setActiveTimer(null);
+    setDismissed(false);
     if (id != null) navigate(`/recipe/${id}`);
     else navigate(-1);
   }, [id, navigate]);
@@ -53,6 +77,38 @@ export function CookRoute() {
   // Wake lock only while we have a real cooking session — not during loading
   // or error states.
   useWakeLock(!!recipe && recipe.steps.length > 0);
+
+  // Timer handlers are hooks, so they must be declared before any conditional
+  // return. handleStartTimer looks up the current step's duration via `recipe`
+  // + `nav.index` so the lookup stays valid even before the early-return ladder
+  // narrows `recipe` to non-null.
+  const handleStartTimer = useCallback(() => {
+    const dm = recipe?.steps[nav.index]?.durationMinutes ?? null;
+    if (dm == null) return;
+    // Replace-confirm: protect a running timer on another step from accidental
+    // overwrite. No prompt when the current step IS the active timer's step
+    // (re-tapping Start after a finished+dismissed run on this same step).
+    if (activeTimer != null && activeTimer.stepIndex !== nav.index) {
+      const ok = window.confirm('Replace running timer?');
+      if (!ok) return;
+    }
+    setActiveTimer({
+      stepIndex: nav.index,
+      totalSec: dm * 60,
+      startedAt: Date.now(),
+    });
+    setDismissed(false);
+  }, [activeTimer, recipe, nav.index]);
+
+  const handleStopTimer = useCallback(() => {
+    setActiveTimer(null);
+    setDismissed(false);
+  }, []);
+
+  const handleDismissTimer = useCallback(() => {
+    setActiveTimer(null);
+    setDismissed(false);
+  }, []);
 
   // Bad id
   if (id == null) {
@@ -124,6 +180,25 @@ export function CookRoute() {
 
   const currentStep = steps[nav.index] ?? { text: '', durationMinutes: null };
 
+  // Derive the TimerCard's visual state for the current step. The active
+  // timer's step may differ from the user's current step (they advanced
+  // without stopping it) — in which case this step's card stays 'idle'.
+  const isActiveOnThisStep =
+    activeTimer != null && activeTimer.stepIndex === nav.index;
+  const timerState: TimerCardState = !isActiveOnThisStep
+    ? 'idle'
+    : isDone && !dismissed
+      ? 'done'
+      : 'running';
+
+  const timerProps: CookStepTimerProps = {
+    state: timerState,
+    remainingSec: isActiveOnThisStep ? remainingSec : 0,
+    onStart: handleStartTimer,
+    onStop: handleStopTimer,
+    onDismiss: handleDismissTimer,
+  };
+
   return (
     <div className={styles.shell}>
       <CookTopBar
@@ -141,6 +216,7 @@ export function CookRoute() {
           count={nav.count}
           step={currentStep}
           recipeTitle={recipe.title}
+          timer={timerProps}
         />
       </div>
 
