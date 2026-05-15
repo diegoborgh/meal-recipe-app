@@ -20,6 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getRecipe } from '@/api/recipe';
 import { ApiError, QuotaError } from '@/api/client';
 import { db } from '@/db';
+import { coerceSteps } from '@/db/favorites';
 import { cacheKey, evict, getCached, setCached } from '@/lib/sessionCache';
 import type { Recipe } from '@/types/recipe';
 
@@ -61,7 +62,9 @@ export function useRecipe(id: number | null): UseRecipeState {
       .then((cached) => {
         if (ac.signal.aborted) return null;
         if (cached && cached.complete) {
-          const { savedAt: _savedAt, complete: _complete, ...recipe } = cached;
+          const { savedAt: _savedAt, complete: _complete, ...rest } = cached;
+          // Legacy rows may have steps as string[]; coerce to RecipeStep[].
+          const recipe: Recipe = { ...rest, steps: coerceSteps(rest.steps) };
           setState({ recipe, loading: false, error: null, quotaExceeded: false });
           return null; // signal: don't fetch
         }

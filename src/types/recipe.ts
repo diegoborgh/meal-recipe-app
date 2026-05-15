@@ -44,7 +44,7 @@ export interface Recipe extends RecipeSummary {
   sourceName: string | undefined;
   sourceUrl: string | undefined;
   ingredients: RecipeIngredient[];
-  steps: string[];
+  steps: RecipeStep[];
   /** Nutrition macros, per ORIGINAL serving. UI scales as needed. */
   nutrition: {
     calories: number | null;
@@ -52,6 +52,17 @@ export interface Recipe extends RecipeSummary {
     carbs: number | null;
     fat: number | null;
   };
+}
+
+/**
+ * One step in a recipe's structured instructions. Duration is preserved
+ * end-to-end so Cook Mode can offer an optional countdown timer when
+ * Spoonacular surfaces a `step.length` value.
+ */
+export interface RecipeStep {
+  text: string;
+  /** Spoonacular's step.length normalized to whole minutes. Null when missing. */
+  durationMinutes: number | null;
 }
 
 export interface RecipeAmount {

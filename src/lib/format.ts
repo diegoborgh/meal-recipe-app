@@ -19,6 +19,7 @@ import type {
   Recipe,
   RecipeBadge,
   RecipeIngredient,
+  RecipeStep,
   RecipeSummary,
 } from '@/types/recipe';
 
@@ -111,16 +112,41 @@ function toIngredient(raw: SpoonacularExtendedIngredient): RecipeIngredient {
 }
 
 /**
+ * Normalize Spoonacular's per-step `length: { number, unit }` to whole
+ * minutes. Returns null when the input is missing/garbage so callers can
+ * "no card" cleanly. Clamped to 1–240 min to drop bizarre outliers
+ * (occasionally Spoonacular returns multi-day "lengths" for marinades).
+ */
+function normalizeLength(length: { number: number; unit: string } | undefined): number | null {
+  if (!length || !Number.isFinite(length.number) || length.number <= 0) return null;
+  const unit = length.unit?.toLowerCase() ?? '';
+  let minutes: number;
+  if (unit.startsWith('sec')) minutes = length.number / 60;
+  else if (unit.startsWith('hour') || unit.startsWith('hr')) minutes = length.number * 60;
+  else minutes = length.number; // default: assume minutes
+  const rounded = Math.round(minutes);
+  if (rounded < 1 || rounded > 240) return null;
+  return rounded;
+}
+
+/**
  * Pull the structured step list out of analyzedInstructions, falling back to
- * a naïve split of the HTML `instructions` field if it's empty.
+ * a naïve split of the HTML `instructions` field if it's empty. The HTML
+ * fallback never carries duration data — every step gets `durationMinutes: null`.
  *
  * We strip HTML tags from the fallback rather than render dangerouslySetInnerHTML —
  * Spoonacular content is third-party and "calm, not alarming" includes XSS-safe.
  */
-function extractSteps(info: SpoonacularRecipeInfo): string[] {
+function extractSteps(info: SpoonacularRecipeInfo): RecipeStep[] {
   const sets = info.analyzedInstructions ?? [];
-  const fromAnalyzed = sets.flatMap((s) => s.steps.map((step) => step.step.trim()));
-  if (fromAnalyzed.length > 0) return fromAnalyzed.filter(Boolean);
+  const fromAnalyzed: RecipeStep[] = sets.flatMap((s) =>
+    s.steps.map((step) => ({
+      text: step.step.trim(),
+      durationMinutes: normalizeLength(step.length),
+    })),
+  );
+  const filtered = fromAnalyzed.filter((s) => s.text);
+  if (filtered.length > 0) return filtered;
 
   if (info.instructions) {
     const text = info.instructions.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -128,7 +154,8 @@ function extractSteps(info: SpoonacularRecipeInfo): string[] {
     return text
       .split(/(?<=\.)\s+(?=[A-Z])/)
       .map((s) => s.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .map((t) => ({ text: t, durationMinutes: null }));
   }
   return [];
 }

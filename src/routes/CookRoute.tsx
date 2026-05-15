@@ -122,7 +122,7 @@ export function CookRoute() {
     );
   }
 
-  const currentStepText = steps[nav.index] ?? '';
+  const currentStep = steps[nav.index] ?? { text: '', durationMinutes: null };
 
   return (
     <div className={styles.shell}>
@@ -139,7 +139,7 @@ export function CookRoute() {
         <CookStep
           index={nav.index}
           count={nav.count}
-          text={currentStepText}
+          step={currentStep}
           recipeTitle={recipe.title}
         />
       </div>

@@ -1,7 +1,8 @@
+import type { RecipeStep } from '@/types/recipe';
 import styles from './InstructionsList.module.css';
 
 export interface InstructionsListProps {
-  steps: string[];
+  steps: RecipeStep[];
 }
 
 export function InstructionsList({ steps }: InstructionsListProps) {
@@ -21,7 +22,7 @@ export function InstructionsList({ steps }: InstructionsListProps) {
           <div className={styles.number} aria-hidden="true">
             {i + 1}
           </div>
-          <div className={styles.body}>{s}</div>
+          <div className={styles.body}>{s.text}</div>
         </li>
       ))}
     </ol>

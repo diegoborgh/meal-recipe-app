@@ -1,0 +1,85 @@
+/*
+ * Optional timer card under the current Cook Mode step. Translucent honey-
+ * accented surface sitting on the warm-dark cook-mode base.
+ *
+ * Mobile: stacked (label row above button).
+ * Desktop: horizontal row (label left, button right).
+ *
+ * Design ref: screens-mobile-2.jsx M_CookB ~L250-260 and screens-desktop.jsx
+ * D_Cook ~L273-280. Subtitle from the design is intentionally omitted —
+ * Spoonacular doesn't provide doneness cues and the button label carries the
+ * timer's live state once slice 2 lands.
+ */
+
+.card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-12);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .card {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--color-honey);
+  font-family: var(--font-body);
+}
+
+@media (min-width: 1024px) {
+  .label {
+    flex: 1;
+    font-size: 14px;
+    gap: 10px;
+  }
+}
+
+.button {
+  align-self: flex-start;
+  background: var(--color-honey);
+  color: #2A1F17;
+  border: 0;
+  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 0 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.button:hover {
+  background: #F0BF6E;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-honey);
+  outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .button {
+    align-self: auto;
+    height: 44px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}

@@ -8,8 +8,38 @@
  */
 
 import { getRecipe } from '@/api/recipe';
-import type { Recipe, RecipeSummary } from '@/types/recipe';
+import type { Recipe, RecipeStep, RecipeSummary } from '@/types/recipe';
 import { db, type FavoriteRow } from './index';
+
+/**
+ * Back-compat for favorited rows persisted before per-step duration was
+ * carried through the Recipe type. Legacy rows stored `steps` as `string[]`;
+ * map those to `[{ text, durationMinutes: null }]`. A subsequent visit to
+ * Recipe Detail re-runs `upgradeFavorite`, which overwrites with the new shape.
+ */
+export function coerceSteps(raw: unknown): RecipeStep[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((s) => {
+      if (typeof s === 'string') return { text: s, durationMinutes: null };
+      if (s && typeof s === 'object' && 'text' in s) {
+        const step = s as { text: unknown; durationMinutes?: unknown };
+        const text = typeof step.text === 'string' ? step.text : '';
+        const dm =
+          typeof step.durationMinutes === 'number' && Number.isFinite(step.durationMinutes)
+            ? step.durationMinutes
+            : null;
+        return { text, durationMinutes: dm };
+      }
+      return { text: '', durationMinutes: null };
+    })
+    .filter((s) => s.text);
+}
+
+/** Coerce a Dexie row's potentially-legacy fields into the current Recipe shape. */
+export function coerceFavoriteRow<T extends { steps: unknown }>(row: T): T & { steps: RecipeStep[] } {
+  return { ...row, steps: coerceSteps(row.steps) };
+}
 
 /**
  * Fire a no-op image fetch so the service worker's CacheFirst rule for
