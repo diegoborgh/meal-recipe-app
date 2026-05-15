@@ -19,8 +19,10 @@
 @media (min-width: 1024px) {
   .frame {
     flex-direction: row;
-    align-items: center;
-    padding: 0 80px;
+    /* stretch (not center) so the right column can constrain its height and
+     * scroll long text without expanding the row past the frame. */
+    align-items: stretch;
+    padding: 40px 80px;
     gap: 80px;
   }
 }
@@ -80,6 +82,10 @@
 .body {
   flex: 1;
   min-width: 0;
+  /* min-height: 0 lets this flex item actually constrain to its parent's
+   * available height — without it, default min-height: auto means content
+   * can overflow downward and slide under the BottomBar. */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -93,6 +99,29 @@
   letter-spacing: -0.2px;
   color: #fff;
   text-wrap: pretty;
+  /* Long step instructions scroll within the reading area instead of pushing
+   * the TimerCard onto the BottomBar. Short text behaves the same as before. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Translucent honey scrollbar on the cook-mode dark surface. */
+.text::-webkit-scrollbar { width: 6px; }
+.text::-webkit-scrollbar-track { background: transparent; }
+.text::-webkit-scrollbar-thumb {
+  background: rgba(232, 178, 92, 0.35);
+  border-radius: 999px;
+}
+.text { scrollbar-width: thin; scrollbar-color: rgba(232, 178, 92, 0.35) transparent; }
+
+/* Desktop: keep the short-text-centered feel by centering body content
+ * vertically. When text overflows, .text grows to fill and scrolls anyway. */
+@media (min-width: 1024px) {
+  .body {
+    justify-content: center;
+  }
 }
 
 @media (min-width: 1024px) {
