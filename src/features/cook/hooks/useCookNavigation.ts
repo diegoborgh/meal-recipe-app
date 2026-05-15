@@ -60,12 +60,19 @@ export function useCookNavigation(
     if (count === 0) return undefined;
     const onKey = (e: KeyboardEvent) => {
       const tgt = e.target as HTMLElement | null;
-      const editable =
+      // Don't hijack keys when focus is on an element that should handle them
+      // itself: form fields, focused buttons/links. The whole-screen shortcuts
+      // are for the propped-up-phone case where nothing's focused. Without
+      // this, pressing Space on a focused TimerCard button silently advances
+      // the step instead of toggling the timer.
+      const focusedOnInteractive =
         tgt &&
         (tgt.tagName === 'INPUT' ||
           tgt.tagName === 'TEXTAREA' ||
+          tgt.tagName === 'BUTTON' ||
+          tgt.tagName === 'A' ||
           tgt.isContentEditable);
-      if (editable) return;
+      if (focusedOnInteractive) return;
 
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();

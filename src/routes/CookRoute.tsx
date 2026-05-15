@@ -9,9 +9,11 @@ import { CookStep, type CookStepTimerProps } from '@/features/cook/components/Co
 import { CookTopBar } from '@/features/cook/components/CookTopBar';
 import { IngredientsPeek } from '@/features/cook/components/IngredientsPeek';
 import type { TimerCardState } from '@/features/cook/components/TimerCard';
+import { TimerPill } from '@/features/cook/components/TimerPill';
 import { useCookNavigation } from '@/features/cook/hooks/useCookNavigation';
 import { useCountdown } from '@/features/cook/hooks/useCountdown';
 import { useWakeLock } from '@/features/cook/hooks/useWakeLock';
+import { playAlarm } from '@/features/cook/lib/alarm';
 import { useRecipe } from '@/features/recipe/hooks/useRecipe';
 import styles from './CookRoute.module.css';
 
@@ -55,9 +57,8 @@ export function CookRoute() {
   const { remainingSec, isDone } = useCountdown({
     startedAt: activeTimer?.startedAt ?? null,
     totalSec: activeTimer?.totalSec ?? 0,
-    onComplete: useCallback(() => {
-      // Slice 3 will wire WebAudio chime + vibrate here.
-    }, []),
+    // Latched in useCountdown — fires exactly once per startedAt.
+    onComplete: playAlarm,
   });
 
   const exit = useCallback(() => {
@@ -182,9 +183,12 @@ export function CookRoute() {
 
   // Derive the TimerCard's visual state for the current step. The active
   // timer's step may differ from the user's current step (they advanced
-  // without stopping it) — in which case this step's card stays 'idle'.
+  // without stopping it) — in which case this step's card stays 'idle'
+  // and the TimerPill surfaces the timer instead.
   const isActiveOnThisStep =
     activeTimer != null && activeTimer.stepIndex === nav.index;
+  const isActiveOnOtherStep =
+    activeTimer != null && activeTimer.stepIndex !== nav.index;
   const timerState: TimerCardState = !isActiveOnThisStep
     ? 'idle'
     : isDone && !dismissed
@@ -219,6 +223,15 @@ export function CookRoute() {
           timer={timerProps}
         />
       </div>
+
+      {isActiveOnOtherStep && activeTimer && (
+        <TimerPill
+          stepNumber={activeTimer.stepIndex + 1}
+          remainingSec={remainingSec}
+          isDone={isDone}
+          onJump={() => nav.goTo(activeTimer.stepIndex)}
+        />
+      )}
 
       <CookBottomBar
         isFirst={nav.isFirst}

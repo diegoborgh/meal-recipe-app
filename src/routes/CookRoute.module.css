@@ -12,6 +12,9 @@
   flex-direction: column;
   min-height: 100dvh;
   height: 100dvh;
+  /* Anchor for the absolutely-positioned TimerPill (slice 3) that floats
+   * above the BottomBar when a timer is running on a different step. */
+  position: relative;
 }
 
 @media (min-width: 1024px) {

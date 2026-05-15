@@ -1,0 +1,88 @@
+/*
+ * Persistent timer pill — surfaces a running Cook Mode timer when the user
+ * has navigated away from its step. Floats above the BottomBar.
+ *
+ * Position math: pill bottom = bottom-bar's own bottom offset + bottom-bar
+ * button height + 16px gap. Bottom-bar paddings live in CookBottomBar.module.css;
+ * any change there should be mirrored here.
+ */
+
+.pill {
+  position: absolute;
+  /* 30px (bar bottom pad) + 72px (button height) + 16px (gap) = 118px */
+  bottom: calc(118px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+
+  background: var(--color-honey);
+  color: #2A1F17;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  z-index: 2;
+
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.pill:hover {
+  background: #F0BF6E;
+}
+
+.pill:focus-visible {
+  outline: 2px solid var(--color-honey);
+  outline-offset: 3px;
+}
+
+.pill:active {
+  transform: translateX(-50%) translateY(1px);
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+}
+
+.step {
+  /* Slightly softer than the time — secondary info. */
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+/* Done state: gentle background pulse so the user notices on glance. */
+.done {
+  animation: pillPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pillPulse {
+  0%, 100% { background: var(--color-honey); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); }
+  50%      { background: #FFD58A; box-shadow: 0 8px 24px rgba(232, 178, 92, 0.45); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .done { animation: none; }
+}
+
+@media (min-width: 1024px) {
+  .pill {
+    /* 36px (bar bottom pad) + 64px (button height) + 16px (gap) = 116px */
+    bottom: 116px;
+    height: 40px;
+    padding: 0 18px;
+    font-size: 14px;
+    gap: 10px;
+  }
+}
