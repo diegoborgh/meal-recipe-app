@@ -26,7 +26,10 @@
   border: none;
   outline: none;
   font-family: var(--font-body);
-  font-size: var(--fs, 14px);
+  /* iOS Safari/Chrome auto-zooms any input under 16px on focus and often
+   * doesn't restore the original scale. Hold a 16px floor on mobile across
+   * every size; desktop scales down to the design's intended sizes below. */
+  font-size: 16px;
   color: var(--color-ink);
 }
 
@@ -34,5 +37,8 @@
   color: var(--color-ink-muted);
 }
 
-.lg .input { --fs: 16px; }
-.sm .input { --fs: 13px; }
+@media (min-width: 768px) {
+  .input { font-size: var(--fs, 14px); }
+  .lg .input { --fs: 16px; }
+  .sm .input { --fs: 13px; }
+}
