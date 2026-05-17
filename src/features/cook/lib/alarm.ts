@@ -1,16 +1,28 @@
 /**
- * playAlarm — fire a soft, kitchen-friendly "ding" when a Cook Mode timer
- * completes. Web Audio for the chime (no asset to ship and no autoplay-policy
- * issues since this is a direct response to user-initiated Start), and the
- * Vibration API for a quiet haptic on devices that support it.
+ * Cook Mode timer alarm — a soft, kitchen-friendly "ding" when the countdown
+ * completes. Web Audio for the chime (no asset to ship), Vibration API for a
+ * quiet haptic on devices that support it.
  *
- * Errors are swallowed: a missing/blocked audio context or a browser that
- * doesn't honor `navigator.vibrate` should not crash the timer flow. Same
- * graceful-degradation pattern as useWakeLock.
+ * iOS Safari only lets an AudioContext leave the `suspended` state if it was
+ * constructed (and resumed) inside a real user gesture. The completion callback
+ * fires inside a setInterval tick — not a gesture — so we lazily create one
+ * shared context the first time the user taps Start (`primeAlarm`) and reuse
+ * it for every subsequent `playAlarm`. Without this, the chime is silent on
+ * iOS even though everything looks right on desktop Chrome.
+ *
+ * Errors are swallowed: a missing/blocked audio context or a browser without
+ * `navigator.vibrate` should not crash the timer flow. Same graceful-
+ * degradation pattern as useWakeLock.
  *
  * The chime is two short overlapping sine tones (G5 + C6) with a soft
- * attack/decay envelope. ~1.4s total, quieter than the default beep.
+ * attack/decay envelope, repeated three times 1.5s apart (~4s total). One
+ * round was too easy to miss in a real kitchen.
  */
+
+const REPEAT_COUNT = 3;
+const REPEAT_GAP_SEC = 1.5;
+
+let sharedCtx: AudioContext | null = null;
 
 function createContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -44,28 +56,40 @@ function playTone(ctx: AudioContext, freq: number, startSec: number, durationSec
   osc.stop(t0 + durationSec + 0.05);
 }
 
+/**
+ * Call from inside a user-gesture handler (the Start button's onClick) to
+ * unlock audio on iOS Safari. Idempotent: subsequent calls reuse the same
+ * context and re-resume it if the browser has suspended it (e.g. tab
+ * backgrounded).
+ */
+export function primeAlarm(): void {
+  if (sharedCtx == null) sharedCtx = createContext();
+  if (sharedCtx == null) return;
+  try {
+    void sharedCtx.resume?.().catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
 export function playAlarm(): void {
-  // Chime
-  const ctx = createContext();
+  // Reuse the primed context; fall back to creating one on the fly for paths
+  // that bypassed priming (defensive — should not happen in normal Cook flow).
+  if (sharedCtx == null) sharedCtx = createContext();
+  const ctx = sharedCtx;
   if (ctx) {
     try {
-      // Some browsers (notably Safari) suspend new contexts until a user
-      // gesture resumes them. Since playAlarm fires inside an interval
-      // callback, not a click, resume() is best-effort.
       void ctx.resume?.().catch(() => {});
-      playTone(ctx, 784, 0, 0.55, 0.22); // G5
-      playTone(ctx, 1047, 0.18, 0.85, 0.18); // C6 — overlapping
-      // Close the context after the longest tone has finished, so we don't
-      // leak audio nodes if the page stays open.
-      window.setTimeout(() => {
-        ctx.close().catch(() => {});
-      }, 1500);
+      for (let i = 0; i < REPEAT_COUNT; i++) {
+        const offset = i * REPEAT_GAP_SEC;
+        playTone(ctx, 784, offset, 0.55, 0.22); // G5
+        playTone(ctx, 1047, offset + 0.18, 0.85, 0.18); // C6 — overlapping
+      }
     } catch {
       // Soft-fail — the timer's visual "Done" state still communicates completion.
     }
   }
 
-  // Haptic
   try {
     navigator.vibrate?.([400, 200, 400, 200, 600]);
   } catch {

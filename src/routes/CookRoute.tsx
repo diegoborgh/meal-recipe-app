@@ -13,7 +13,7 @@ import { TimerPill } from '@/features/cook/components/TimerPill';
 import { useCookNavigation } from '@/features/cook/hooks/useCookNavigation';
 import { useCountdown } from '@/features/cook/hooks/useCountdown';
 import { useWakeLock } from '@/features/cook/hooks/useWakeLock';
-import { playAlarm } from '@/features/cook/lib/alarm';
+import { playAlarm, primeAlarm } from '@/features/cook/lib/alarm';
 import { useRecipe } from '@/features/recipe/hooks/useRecipe';
 import styles from './CookRoute.module.css';
 
@@ -84,6 +84,9 @@ export function CookRoute() {
   // + `nav.index` so the lookup stays valid even before the early-return ladder
   // narrows `recipe` to non-null.
   const handleStartTimer = useCallback(() => {
+    // Unlock the audio context inside this user-gesture handler so the chime
+    // can play on iOS Safari when the timer completes (see alarm.ts).
+    primeAlarm();
     const dm = recipe?.steps[nav.index]?.durationMinutes ?? null;
     if (dm == null) return;
     // Replace-confirm: protect a running timer on another step from accidental

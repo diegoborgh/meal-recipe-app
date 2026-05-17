@@ -2,8 +2,8 @@
  * Optional timer card under the current Cook Mode step. Translucent honey-
  * accented surface sitting on the warm-dark cook-mode base.
  *
- * Mobile: stacked (label row above button).
- * Desktop: horizontal row (label left, button right).
+ * Layout is a single horizontal row on every breakpoint (label left, button
+ * right). Desktop just bumps sizes and padding.
  *
  * Design ref: screens-mobile-2.jsx M_CookB ~L250-260 and screens-desktop.jsx
  * D_Cook ~L273-280. Subtitle from the design is intentionally omitted —
@@ -15,26 +15,49 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-12);
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Done state: warm glow pulse so the card mirrors the persistent pill's
+ * attention-grabbing animation. Cadence matches TimerPill.module.css. */
+.card[data-state='done'] {
+  animation: cardPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes cardPulse {
+  0%, 100% {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+  50% {
+    background: rgba(232, 178, 92, 0.18);
+    border-color: rgba(232, 178, 92, 0.5);
+    box-shadow: 0 0 24px rgba(232, 178, 92, 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-state='done'] { animation: none; }
 }
 
 @media (min-width: 1024px) {
   .card {
-    flex-direction: row;
-    align-items: center;
     gap: 14px;
     padding: 16px 20px;
   }
 }
 
 .label {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.4px;
   text-transform: uppercase;
@@ -44,24 +67,20 @@
 
 @media (min-width: 1024px) {
   .label {
-    flex: 1;
     font-size: 14px;
     gap: 10px;
   }
 }
 
 .button {
-  /* Mobile (flex-column card): hug the right edge so the button sits opposite
-   * the label, mirroring the desktop row layout. Desktop overrides to `auto`. */
-  align-self: flex-end;
   background: var(--color-honey);
   color: #2A1F17;
   border: 0;
   border-radius: var(--radius-pill);
-  height: 36px;
-  padding: 0 16px;
+  height: 40px;
+  padding: 0 18px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   font-variant-numeric: tabular-nums;
@@ -79,9 +98,8 @@
 
 @media (min-width: 1024px) {
   .button {
-    align-self: auto;
     height: 44px;
-    padding: 0 20px;
-    font-size: 14px;
+    padding: 0 22px;
+    font-size: 16px;
   }
 }
