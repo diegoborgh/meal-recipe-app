@@ -15,7 +15,7 @@ const ITEMS: NavItem[] = [
   { to: '/', label: 'Cook', icon: 'home', end: false },
   { to: '/fridge', label: 'Fridge', icon: 'fridge' },
   { to: '/favorites', label: 'Saved', icon: 'bookmark' },
-  { to: '/preferences', label: 'You', icon: 'settings' },
+  { to: '/preferences', label: 'You', icon: 'chef' },
 ];
 
 export function MobileNav() {

@@ -82,3 +82,9 @@
 .footerItemActive {
   color: var(--color-ink);
 }
+
+.footerItemIcon {
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(-2px);
+}

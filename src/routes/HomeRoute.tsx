@@ -47,14 +47,16 @@ export function HomeRoute() {
     <div className={styles.page}>
       <div className={styles.headerBar}>
         <SkilletWordmark size={20} />
-        <button
-          type="button"
-          className={styles.headerButton}
-          aria-label="Preferences"
-          onClick={() => navigate('/preferences')}
-        >
-          <Icon name="settings" size={18} />
-        </button>
+        {isDesktop && (
+          <button
+            type="button"
+            className={styles.headerButton}
+            aria-label="Preferences"
+            onClick={() => navigate('/preferences')}
+          >
+            <Icon name="settings" size={18} />
+          </button>
+        )}
       </div>
 
       <div className={styles.eyebrow}>{currentDayLabel()}</div>

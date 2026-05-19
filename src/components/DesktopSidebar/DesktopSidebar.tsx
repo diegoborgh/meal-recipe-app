@@ -45,7 +45,9 @@ export function DesktopSidebar() {
             `${styles.footerItem} ${isActive ? styles.footerItemActive : ''}`
           }
         >
-          <Icon name="settings" size={18} />
+          <span className={styles.footerItemIcon}>
+            <Icon name="chef" size={18} />
+          </span>
           <span>Preferences</span>
         </NavLink>
       </div>
