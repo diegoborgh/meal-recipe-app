@@ -13,7 +13,11 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { findRecipesByIngredients, type FridgeMatchResult } from '@/api/fridge';
+import {
+  enrichFridgeMatches,
+  findRecipesByIngredients,
+  type FridgeMatchResult,
+} from '@/api/fridge';
 import { ApiError, QuotaError } from '@/api/client';
 import { cacheKey, evict, getCached, setCached } from '@/lib/sessionCache';
 
@@ -60,10 +64,24 @@ export function useFridgeRecipes(ingredients: string[]): UseFridgeRecipesState {
     setState((s) => ({ ...s, loading: true, error: null, quotaExceeded: false }));
 
     findRecipesByIngredients(ingredients, 20, { signal: ac.signal })
-      .then((matches) => {
+      .then(async (matches) => {
         if (ac.signal.aborted) return;
-        setCached(key, matches);
+        // Render matches immediately, then swap in the enriched copy when
+        // time + calories arrive. If the bulk call fails (quota, network),
+        // the basic matches stay visible.
         setState({ matches, loading: false, error: null, quotaExceeded: false });
+        try {
+          const enriched = await enrichFridgeMatches(matches, { signal: ac.signal });
+          if (ac.signal.aborted) return;
+          setCached(key, enriched);
+          setState({ matches: enriched, loading: false, error: null, quotaExceeded: false });
+        } catch (err) {
+          if (ac.signal.aborted) return;
+          if (err instanceof DOMException && err.name === 'AbortError') return;
+          // Non-fatal: cache the unenriched results so we don't re-pay the
+          // findByIngredients cost, and leave the UI as-is.
+          setCached(key, matches);
+        }
       })
       .catch((err: unknown) => {
         if (ac.signal.aborted) return;

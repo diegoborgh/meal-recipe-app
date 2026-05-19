@@ -54,6 +54,13 @@ const ENDPOINTS = {
     sMaxAge: 60 * 60 * 24,      // 24 hours
     swr: 60 * 60 * 24 * 7,
   },
+  // Bulk recipe info — used by the Fridge feature to enrich findByIngredients
+  // results with time/calories. Same cacheability as /information.
+  'recipes/informationBulk': {
+    path: '/recipes/informationBulk',
+    sMaxAge: 60 * 60 * 24,
+    swr: 60 * 60 * 24 * 7,
+  },
   // Ingredient autocomplete (Fridge input).
   'food/ingredients/autocomplete': {
     path: '/food/ingredients/autocomplete',

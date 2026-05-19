@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
+import { DietBadge } from '@/components/DietBadge';
 import type { FridgeMatchResult } from '@/api/fridge';
 import styles from './FridgeCard.module.css';
 
@@ -10,21 +11,21 @@ export interface FridgeCardProps {
 }
 
 /**
- * Pretty list of missing ingredients. Up to 3 names; truncates with "…and 2
- * more" when longer. Hidden when nothing's missing.
+ * Compose the recipe meta line ("25 min · 420 kcal"). Either side may be
+ * absent (Spoonacular sometimes omits readyInMinutes or nutrition); we drop
+ * the separator gracefully and return null if both are missing.
  */
-function formatMissing(names: string[]): string | null {
-  if (names.length === 0) return null;
-  if (names.length <= 3) return `Need: ${names.join(', ')}`;
-  const head = names.slice(0, 3).join(', ');
-  return `Need: ${head}, and ${names.length - 3} more`;
+function formatMeta(time: string | null | undefined, calories: string | null | undefined): string | null {
+  const parts = [time, calories].filter((p): p is string => Boolean(p));
+  return parts.length ? parts.join(' · ') : null;
 }
 
 export function FridgeCard({ match, variant }: FridgeCardProps) {
   const navigate = useNavigate();
   const [imgErrored, setImgErrored] = useState(false);
   const showImg = match.image && !imgErrored;
-  const missing = formatMissing(match.missedNames);
+  const meta = formatMeta(match.time, match.calories);
+  const badges = match.badges ?? [];
 
   if (variant === 'row') {
     return (
@@ -66,7 +67,16 @@ export function FridgeCard({ match, variant }: FridgeCardProps) {
               {match.missedCount} need
             </span>
           </div>
-          {missing && <div className={styles.missing}>{missing}</div>}
+          {meta && <div className={styles.meta}>{meta}</div>}
+          {badges.length > 0 && (
+            <div className={styles.badges}>
+              {badges.map((b, i) => (
+                <DietBadge key={`${b.label}-${i}`} tone={b.tone}>
+                  {b.label}
+                </DietBadge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -118,7 +128,16 @@ export function FridgeCard({ match, variant }: FridgeCardProps) {
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardTitle}>{match.title}</div>
-        {missing && <div className={styles.cardMissing}>{missing}</div>}
+        {meta && <div className={styles.cardMeta}>{meta}</div>}
+        {badges.length > 0 && (
+          <div className={styles.badges}>
+            {badges.map((b, i) => (
+              <DietBadge key={`${b.label}-${i}`} tone={b.tone}>
+                {b.label}
+              </DietBadge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
