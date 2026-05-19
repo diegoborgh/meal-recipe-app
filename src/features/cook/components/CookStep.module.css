@@ -34,6 +34,13 @@
 @media (min-width: 1024px) {
   .numberWrap {
     flex: 1;
+    /* Center the giant number vertically inside its stretched column so it
+     * sits at the same vertical midpoint as the step text on the right
+     * (.body uses justify-content: center for the same reason). Matches the
+     * design handoff's centered layout. */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 }
 
@@ -63,6 +70,15 @@
   font-size: 24px;
 }
 
+/* Per the design handoff (screens-desktop.jsx ~L266), the giant number on
+ * desktop is just the digit — the "/N" subscript is mobile-only. The full
+ * count is conveyed by the .numberSubtitle row underneath. */
+@media (min-width: 1024px) {
+  .numberOf.mobile {
+    display: none;
+  }
+}
+
 .numberSubtitle {
   display: none;
 }
@@ -88,20 +104,27 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .text {
-  font-family: var(--font-body);
-  font-size: 26px;
-  line-height: 1.32;
+  /* Use the display serif on every breakpoint — Diego prefers a single
+   * consistent voice across mobile and desktop in Cook Mode. Sized to the
+   * compact end of the range so long steps fit without scrolling and every
+   * step in a recipe reads at the same size. */
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.3;
   font-weight: 500;
   letter-spacing: -0.2px;
   color: #fff;
   text-wrap: pretty;
-  /* Long step instructions scroll within the reading area instead of pushing
-   * the TimerCard onto the BottomBar. Short text behaves the same as before. */
-  flex: 1 1 auto;
+  /* Don't flex-grow: short text stays at its natural height so .body's
+   * justify-content: center can actually vertically center it (matching the
+   * design handoff). Long step instructions still scroll within the reading
+   * area — flex-shrink + min-height: 0 + overflow-y: auto handles overflow
+   * without pushing the TimerCard onto the BottomBar. */
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -126,10 +149,19 @@
 
 @media (min-width: 1024px) {
   .text {
-    font-family: var(--font-display);
-    font-size: 36px;
+    font-size: 30px;
     line-height: 1.25;
     font-weight: 500;
     letter-spacing: -0.4px;
   }
+}
+
+/* Each sentence renders as its own paragraph so instructions have breathing
+ * room — Spoonacular often packs multiple sentences into one step string. */
+.sentence {
+  margin: 0;
+}
+
+.sentence + .sentence {
+  margin-top: 0.6em;
 }

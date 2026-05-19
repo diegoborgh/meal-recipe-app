@@ -11,7 +11,7 @@ import type {
   SpoonacularSearchResponse,
 } from '@/types/api';
 import type { RecipeSummary } from '@/types/recipe';
-import { toRecipeSummary } from '@/lib/format';
+import { hasCookableSteps, toRecipeSummary } from '@/lib/format';
 
 /** Sort orders we expose. Spoonacular has more; this is the curated set. */
 export type SearchSort = 'popularity' | 'time' | 'random';
@@ -75,8 +75,12 @@ export async function searchRecipes(
     options,
   );
 
+  // Drop any hit that has no usable instructions. Spoonacular's
+  // instructionsRequired flag isn't strict enough — see hasCookableSteps.
+  const usable = (data.results ?? []).filter(hasCookableSteps);
+
   return {
-    results: (data.results ?? []).map((r: SpoonacularSearchHit) => toRecipeSummary(r)),
+    results: usable.map((r: SpoonacularSearchHit) => toRecipeSummary(r)),
     offset: data.offset ?? 0,
     number: data.number ?? DEFAULT_PAGE_SIZE,
     totalResults: data.totalResults ?? 0,

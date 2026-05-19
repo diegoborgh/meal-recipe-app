@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ErrorState } from '@/components/states';
 import { usePreferences, type Units } from '@/context/PreferencesContext';
 import { useIsDesktop } from '@/hooks/useBreakpoint';
@@ -36,6 +36,7 @@ interface ActiveTimer {
 export function CookRoute() {
   const { id: idParam } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const isDesktop = useIsDesktop();
   const { preferences } = usePreferences();
 
@@ -64,9 +65,16 @@ export function CookRoute() {
   const exit = useCallback(() => {
     setActiveTimer(null);
     setDismissed(false);
-    if (id != null) navigate(`/recipe/${id}`);
-    else navigate(-1);
-  }, [id, navigate]);
+    // Pop the /cook entry off history instead of pushing/replacing a fresh
+    // /recipe entry. Otherwise the recipe page's "Back to results" lands on
+    // /cook (or, with replace, on a duplicate /recipe entry that requires
+    // two clicks). Falls back to a fresh /recipe nav for deep-links where
+    // there's no history to pop.
+    const cameFromInApp = location.key !== 'default';
+    if (cameFromInApp) navigate(-1);
+    else if (id != null) navigate(`/recipe/${id}`, { replace: true });
+    else navigate('/');
+  }, [id, location.key, navigate]);
 
   const nav = useCookNavigation(recipe?.steps.length ?? 0, {
     onExit: () => {

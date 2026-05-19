@@ -79,6 +79,21 @@ export function badgesFor(hit: SpoonacularSearchHit): RecipeBadge[] {
   return badges.slice(0, 2);
 }
 
+/**
+ * True when a search hit has at least one usable instruction step.
+ * Spoonacular's `instructionsRequired=true` filter is unreliable — recipes
+ * with empty `analyzedInstructions` and no `instructions` HTML still slip
+ * through. We re-check on the client so dead-end recipes (no steps to cook
+ * once you open them) never make it onto a results page.
+ */
+export function hasCookableSteps(hit: SpoonacularSearchHit): boolean {
+  const sets = hit.analyzedInstructions ?? [];
+  for (const set of sets) {
+    if (set.steps?.some((s) => s.step && s.step.trim())) return true;
+  }
+  return !!hit.instructions && hit.instructions.replace(/<[^>]+>/g, '').trim().length > 0;
+}
+
 /** Map a Spoonacular complexSearch hit into a card-ready RecipeSummary. */
 export function toRecipeSummary(hit: SpoonacularSearchHit): RecipeSummary {
   const kcal = findNutrient(hit.nutrition?.nutrients, 'Calories');

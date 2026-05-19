@@ -50,6 +50,11 @@ export interface SpoonacularSearchHit {
   sourceUrl?: string;
   sourceName?: string;
   summary?: string;
+  /** Present when addRecipeInformation=true. Used to drop recipes with no
+   *  cookable steps from search results. */
+  analyzedInstructions?: SpoonacularInstructionSet[];
+  /** HTML fallback. Present when addRecipeInformation=true. */
+  instructions?: string;
 }
 
 export interface SpoonacularSearchResponse {
